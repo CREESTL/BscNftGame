@@ -1,0 +1,16 @@
+{
+  "name": "bsc-nft-game-sc",
+  "scripts": {
+    "prettier": "prettier --write contracts/*.sol",
+    "coverage": "npx hardhat coverage",
+    "build": "npx hardhat compile",
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1"
+  }
+}
