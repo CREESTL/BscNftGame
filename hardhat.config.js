@@ -1,9 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@openzeppelin/hardhat-upgrades");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.9",
+  solidity: "0.8.12",
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
   },
@@ -18,8 +19,6 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: {
-      testnet: ""
-    }
+    apiKey: process.env.API_KEY,
   }
 };
