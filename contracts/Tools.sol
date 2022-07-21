@@ -15,11 +15,11 @@ contract Tools is ERC1155, Ownable {
         uint256 miningResource;
         uint256[] miningArtifacts; 
         uint256 strength;
+        uint256 maxStrength;
         uint256 miningDuration;
         uint256 resourcesCost; 
         uint256 strengthCost;
         uint256 rewardRate;
-
     }
 
     struct Recipe {
@@ -55,6 +55,7 @@ contract Tools is ERC1155, Ownable {
         _tools[newItem].miningResource = miningResource;
         _tools[newItem].miningArtifacts = miningArtifacts;
         _tools[newItem].strength = strength;
+        _tools[newItem].maxStrength = strength;
         _tools[newItem].miningDuration = miningDuration;
         _tools[newItem].resourcesCost = resourcesCost;
         _tools[newItem].strengthCost = strengthCost;
@@ -127,6 +128,12 @@ contract Tools is ERC1155, Ownable {
         //resourcesId = _recipes[recipieId].resourcesId;
         //amount1 = _recipes[recipieId].amount1;
         //TODO
+    }
+
+    // ----------- Repair functions ----------
+
+    function repairTool() external {
+        
     }
 
     // ----------- Utils Functions -----------
