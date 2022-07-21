@@ -39,7 +39,7 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, IAr
         level[4] = 4;
         level[5] = 4;
 
-        __ERC1155_init(string.concat(baseUri, "{id}.json"));
+        __ERC1155_init("");
         __Ownable_init();
         __Pausable_init();
         _pause();
