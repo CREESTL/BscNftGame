@@ -54,7 +54,7 @@ contract MyContract is Initializable, PausableUpgradeable, OwnableUpgradeable {
         emit MiningStarted(msg.sender, toolId, resourceAmount, block.timestamp);
     }
 
-    function returnTool() external {
+    function endMining() external {
         require(session[msg.sender].started == true, "User does not mine");
         require(block.timestamp >= session[msg.sender].endTime);
         tools.safeTransferFrom(address(this), msg.sender, session[msg.sender].toolId, 1, "");
