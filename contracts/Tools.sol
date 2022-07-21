@@ -10,29 +10,71 @@ contract Tools is ERC1155, Ownable {
 
     string private _baseURI = "";
 
+    struct Tool {
+        uint8 level;
+        uint256 miningResource;
+        uint256[] miningArtifacts; 
+        uint256 strength;
+        uint256 miningDuration;
+        uint256 resourcesCost; 
+        uint256 strengthCost;
+        uint256 rewardRate;
+
+    }
+
     struct Recipe {
         uint256 toolId;
         mapping (uint256 => uint256) resources;
         mapping (uint256 => uint256) artifacts;
     }
 
+    uint256 private _toolIds;
     uint256 private _artifactAmount = 6;
-    uint256 private _recipeAmount = 0;
+    uint256 private _recipeAmount;
     uint256 private _resourceAmount = 3;
     
+
     mapping(uint256 => string) private _tokenURIs;
+    mapping(uint256 => Tool) private _tools;
     mapping(uint256 => Recipe) private _recipes;
 
     constructor() ERC1155("") {}
 
     // ----------- Mint functions -----------
 
+    function addTool(uint8 level, uint256 miningResource, uint256[] memory miningArtifacts, uint256 strength, uint256 miningDuration, uint256 resourcesCost, uint256 strengthCost, uint256 rewardRate) external onlyOwner returns (uint256) {
+        require (miningResource <= _resourceAmount, "Tools: invalid mining resource value");
+        for (uint256 counter = 0; counter < miningArtifacts.length; counter++) {
+            require (miningArtifacts[counter] <= _artifactAmount, "Tools: invalid arifact value");
+        }
+        require (strength % 5 == 0, "Tools: invalid strength value");
+        
+        _toolIds++;
+        uint256 newItem = _toolIds; 
+        _tools[newItem].level = level;
+        _tools[newItem].miningResource = miningResource;
+        _tools[newItem].miningArtifacts = miningArtifacts;
+        _tools[newItem].strength = strength;
+        _tools[newItem].miningDuration = miningDuration;
+        _tools[newItem].resourcesCost = resourcesCost;
+        _tools[newItem].strengthCost = strengthCost;
+        _tools[newItem].rewardRate = rewardRate;
+        
+        //emit AddTool(newItem);
+        return newItem;
+    }
+
     function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyOwner {
+        require (id <= _toolIds, "Tools: invalid id value");
         _mint(account, id, amount, data);
     }
 
     function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public onlyOwner {
+        for (uint256 counter = 0; counter < ids.length; counter++) {
+            require (ids[counter] <= _toolIds, "Tools: invalid id value");
+        }
         _mintBatch(to, ids, amounts, data);
+
     }
 
     // ----------- URI functions -----------
@@ -63,6 +105,7 @@ contract Tools is ERC1155, Ownable {
     // ----------- Recipes Functions -----------
 
     function createRecipe(uint256 toolId, uint256[] memory resourcesId, uint256[] memory amount1, uint256[] memory artifactsId, uint256[] memory amount2) external virtual onlyOwner {
+        require(toolId <= _toolIds, "Tools: invalid toolId value");
         require(resourcesId.length <= _resourceAmount && artifactsId.length <= _artifactAmount, "Tools: invalid array size");
         require(resourcesId.length == amount1.length && artifactsId.length == amount2.length, "Tools: the sizes of the arrays do not match");
 
@@ -80,7 +123,10 @@ contract Tools is ERC1155, Ownable {
     } 
 
     function getRecipe(uint256 recipieId) public view virtual returns (uint256 toolId, uint256[] memory resourcesId, uint256[] memory amount1, uint256[] memory artifactsId, uint256[] memory amount2) {
-        // TODO
+        //toolId = _recipes[recipieId].toolId;
+        //resourcesId = _recipes[recipieId].resourcesId;
+        //amount1 = _recipes[recipieId].amount1;
+        //TODO
     }
 
     // ----------- Utils Functions -----------
