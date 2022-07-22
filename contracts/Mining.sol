@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
-
 contract MyContract is Initializable, PausableUpgradeable, OwnableUpgradeable {
     IERC20 public resources;    
     IERC1155 public tools;
@@ -16,9 +15,10 @@ contract MyContract is Initializable, PausableUpgradeable, OwnableUpgradeable {
     uint256 public miningTime;
 
     struct MiningSession {
-        uint256 endTime;
-        uint256 toolId;
-        uint256 resourceAmount;
+        uint32 endTime;
+        uint32 toolId;
+        uint32 toolType;
+        uint32 resourceAmount;
         bool started;
     }
 
@@ -46,10 +46,9 @@ contract MyContract is Initializable, PausableUpgradeable, OwnableUpgradeable {
     function startMining(uint256 resourceAmount, uint256 toolId) external {
         require(!session[msg.sender].started, "This user already started mining process");
         tools.safeTransferFrom(msg.sender, address(this), toolId, 1, "");
-        resources.transferFrom(msg.sender, address(this), resourceAmount);
-        session[msg.sender].resourceAmount = resourceAmount;
-        session[msg.sender].endTime = block.timestamp + miningTime;
-        session[msg.sender].toolId = toolId;
+        session[msg.sender].resourceAmount = uint32(resourceAmount);
+        session[msg.sender].endTime = uint32(block.timestamp + miningTime);
+        session[msg.sender].toolId = uint32(toolId);
         session[msg.sender].started = true;
         emit MiningStarted(msg.sender, toolId, resourceAmount, block.timestamp);
     }
