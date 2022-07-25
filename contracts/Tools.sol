@@ -21,7 +21,6 @@ contract Tools is ERC1155, Ownable {
         uint256 resourcesCost; 
         uint256 strengthCost;
         uint256 rewardRate;
-
     }
 
     struct OwnedTool {

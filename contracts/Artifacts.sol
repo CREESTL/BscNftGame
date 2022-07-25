@@ -76,13 +76,13 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, IAr
         }
     }
 
-    function addNewArtifact(string memory name, uint256 _level) onlyOwner external {
+    function addNewArtifact(string memory name, uint256 _level) onlyOwner virtual external {
         idCount += 1;
         level[idCount-1] = _level;
         artifactName[idCount-1] = name;
     }
 
-    function uri(uint256 id) view override public returns(string memory) {
+    function uri(uint256 id) view virtual override public returns(string memory) {
         require(id < idCount, "This token doesn't exist");
         return string(abi.encodePacked(baseUri, Strings.toString(id), ".json"));
     }
