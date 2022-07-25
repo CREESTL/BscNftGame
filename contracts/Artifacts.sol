@@ -13,16 +13,17 @@ import "./interfaces/IArtifacts.sol";
 contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, IArtifacts, PausableUpgradeable {
     IBlackList public blackList;
 
-    string public baseUri;
+    string private baseUri;
     uint256 public idCount;
+    IBlackList private blacklist;
     // map artifact id and token level
     mapping(uint256 => uint256) public level;
     // map artifact id and artifact name
     mapping(uint256 => string) public artifactName;
 
-    function initialize(string memory _baseUri, address _blackListContractAddress) initializer public {
-        baseUri = _baseUri;
-        blackList = IBlackList(_blackListContractAddress);
+    function initialize(string memory _baseUrl, address _blackListContractAddress) initializer public {
+        baseUri = _baseUrl;
+        blacklist = IBlackList(_blackListContractAddress);
 
         idCount = 6;
         artifactName[0] = "Magic smoothie";
@@ -88,7 +89,7 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, IAr
     }
 
     modifier isInBlacklist(address user) {
-        require(!blackList.check(user), "User in blacklist");
+        require(!blacklist.check(user), "User in blacklist");
         _;
     }
 }

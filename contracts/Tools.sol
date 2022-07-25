@@ -2,13 +2,18 @@
 pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+
 import "./interfaces/IResources.sol";
+import "./interfaces/IBlackList.sol";
 
-
-contract Tools is ERC1155, Ownable {
+contract Tools is Initializable, OwnableUpgradeable, ERC1155Upgradeable, PausableUpgradeable {
     using Strings for uint256;
+
+    IBlackList blacklist;
 
     string private _baseURI = "";
 
@@ -48,7 +53,12 @@ contract Tools is ERC1155, Ownable {
     mapping (uint256 => Recipe) private _recipes;
     mapping (address => mapping(uint256 => OwnedTool)) _ownedTools;
 
-    constructor() ERC1155("") {}
+    function initialize(address blacklistAddress) initializer public {
+        blacklist = IBlackList(blacklistAddress);
+
+        __ERC1155_init("");
+        __Ownable_init();
+    }
 
     // ----------- Mint functions -----------
 
@@ -74,7 +84,7 @@ contract Tools is ERC1155, Ownable {
         return newType;
     }
 
-    function mint(address account, uint256 id, uint256 amount) public onlyOwner {
+    function mint(address account, uint256 id, uint256 amount) public onlyOwner isInBlacklist(account) {
         require (id <= _toolTypes, "Tools: invalid id value");
         _mint(account, id, amount, "");
         
@@ -83,7 +93,7 @@ contract Tools is ERC1155, Ownable {
         _ownedTools[account][_toolIds].strength = _tools[id].maxStrength;
     }
 
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public onlyOwner {
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public onlyOwner isInBlacklist(to) {
         for (uint256 counter = 0; counter < ids.length; counter++) {
             require (ids[counter] <= _toolTypes, "Tools: invalid id value");
         }
@@ -147,7 +157,7 @@ contract Tools is ERC1155, Ownable {
         //emit CreateRecipe(_recipeAmount - 1);
     } 
 
-    function getRecipe(uint256 recipieId) public view virtual returns (uint256 toolId, uint256[] memory resourcesAmount, uint256[] memory artifactsAmount) {
+    function getRecipe(uint256 recipieId) public view virtual whenNotPaused returns (uint256 toolId, uint256[] memory resourcesAmount, uint256[] memory artifactsAmount) {
         require (recipieId <= _recipeAmount, "Tools: invalid recipieId value");
         toolId = _recipes[recipieId].toolId;
         for (uint256 counter = 0; counter < _resourceAmount; counter++) {
@@ -180,7 +190,7 @@ contract Tools is ERC1155, Ownable {
         }
     }
     
-    function repairTool(uint256 toolId, uint256 repairValue) public virtual { 
+    function repairTool(uint256 toolId, uint256 repairValue) public virtual whenNotPaused isInBlacklist(msg.sender) { 
         require (_ownedTools[_msgSender()][toolId].toolType > 0, "Tools: tool does not exist");
         for (uint256 counter = 1; counter <= _resourceAmount; counter++) {
             if (_repairCost[counter] > 0) {
@@ -204,5 +214,18 @@ contract Tools is ERC1155, Ownable {
 
     function getRecipieAmount() public view returns (uint256) {
         return _recipeAmount;
+    }
+
+    function pause() onlyOwner external {
+        if (!paused()) {
+            _pause();
+        } else {
+            _unpause();
+        }
+    }
+
+    modifier isInBlacklist(address user) {
+        require(!blacklist.check(user), "User in blacklist");
+        _;
     }
 }
