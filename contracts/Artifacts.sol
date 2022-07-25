@@ -17,7 +17,7 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, Pau
     uint256 constant public GOLDEN_TREE = 5;
 
     string private baseUrl;
-    IBlackList private blackList;
+    IBlackList private blacklist;
     // map artifact id and token level
     mapping(uint256 => uint256) public level;
     // map artifact id and artifact name
@@ -25,7 +25,7 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, Pau
 
     function initialize(string memory _baseUrl, address _blackListContractAddress) initializer public {
         baseUrl = _baseUrl;
-        blackList = IBlackList(_blackListContractAddress);
+        blacklist = IBlackList(_blackListContractAddress);
 
         artifactName[MAGIC_SMOOTHIE] = "Magic smoothie";
         artifactName[MONEY_TREE] = "Money tree";
@@ -77,7 +77,7 @@ contract Artifacts is Initializable, OwnableUpgradeable, ERC1155Upgradeable, Pau
     }
 
     modifier isInBlacklist(address user) {
-        require(!blackList.check(user), "User in blacklist");
+        require(!blacklist.check(user), "User in blacklist");
         _;
     }
 }
