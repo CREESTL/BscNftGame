@@ -23,10 +23,8 @@ describe("Traits contract tests", async () => {
     it("init", async () => {
         let baseURI = await artifacts.baseUri();
         let idCount = await artifacts.idCount();
-        let blacklistAddress = await artifacts.blackList();
 
         expect(baseURI).eql(BASE_URI);
-        expect(blacklistAddress).eql(blacklist.address);
         expect(idCount).eql(ethers.BigNumber.from(6));
 
         expect(await artifacts.artifactName(0)).eql("Magic smoothie");
