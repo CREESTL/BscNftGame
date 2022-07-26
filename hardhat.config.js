@@ -23,7 +23,8 @@ module.exports = {
     },
     testnet: {
       url: process.env.TESTNET_URL || '',
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : []
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 60000
     }
   },
   etherscan: {
