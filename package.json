@@ -1,7 +1,7 @@
 {
   "name": "bsc-nft-game-sc",
   "scripts": {
-    "prettier": "prettier --write contracts/*.sol",
+    "prettier": "prettier --write contracts/*.sol && prettier --write contracts/interfaces/*.sol && prettier --write contracts/others/*.sol",
     "coverage": "npx hardhat coverage",
     "build": "npx hardhat compile",
     "test": "npx hardhat test"
@@ -9,7 +9,9 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@openzeppelin/contracts-upgradeable": "^4.7.0",
-    "hardhat": "^2.10.1"
+    "hardhat": "^2.10.1",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-dev.23"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.0",
