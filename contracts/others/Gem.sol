@@ -33,15 +33,23 @@ contract Gem is Ownable, ERC20 {
 
     function compensateBnb(address to, uint256 bnbAmount) external {
         if (msg.sender == compensator) {
-            _mint(to, bnbAmount * compensationRate / 10**9);
+            _mint(to, (bnbAmount * compensationRate) / 10**9);
         }
     }
 
-    function _beforeTokenTransfer(address, address to, uint256) internal view override {
+    function _beforeTokenTransfer(
+        address,
+        address to,
+        uint256
+    ) internal view override {
         require(!blocked[to], "Can not transfer to blocked addresses");
     }
 
-    function _approve(address owner, address spender, uint256 amount) internal override {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal override {
         require(!blocked[spender], "Can not approve blocked addresses");
         super._approve(owner, spender, amount);
     }

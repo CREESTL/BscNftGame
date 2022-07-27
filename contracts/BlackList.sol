@@ -8,16 +8,16 @@ import "./interfaces/IBlackList.sol";
 contract BlackList is IBlackList, Ownable {
     mapping(address => bool) private list;
 
-    function check(address user) external view returns(bool) {
+    function check(address user) external view returns (bool) {
         return list[user];
     }
 
-    function addToBlacklist(address user) onlyOwner external {
+    function addToBlacklist(address user) external onlyOwner {
         require(list[user] == false, "User already in blacklist");
         list[user] = true;
     }
 
-    function removeFromBlacklist(address user) onlyOwner external {
+    function removeFromBlacklist(address user) external onlyOwner {
         require(list[user] == true, "User is not in blacklist");
         list[user] = false;
     }
