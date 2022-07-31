@@ -7,6 +7,5 @@ interface IArtifacts is IERC1155Upgradeable {
     struct Artifact {
         string name;
         uint128 level;
-        uint128 tokenType;
     }
 }

@@ -11,6 +11,8 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IMining.sol";
 import "./interfaces/IResources.sol";
 
+import "hardhat/console.sol";
+
 contract Mining is
     Initializable,
     PausableUpgradeable,
@@ -23,8 +25,8 @@ contract Mining is
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
 
-    event MiningStarted(MiningSession);
-    event MiningEnded(MiningSession);
+    event MiningStarted(address user, MiningSession session);
+    event MiningEnded(address user, MiningSession session);
 
     function initialize(address blacklistAddress, address toolsAddress)
         public
@@ -63,7 +65,7 @@ contract Mining is
             uint256 miningDuration,
             uint256 energyCost,
             uint256 rewardRate
-        ) = _tools.getToolProperties(toolId);
+        ) = _tools.getToolProperties(_msgSender(), toolId);
 
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
@@ -83,7 +85,7 @@ contract Mining is
             started: true
         });
 
-        emit MiningStarted(_session[_msgSender()][toolId]);
+        emit MiningStarted(_msgSender(), _session[_msgSender()][toolId]);
     }
 
     function endMining(uint256 toolId)
@@ -102,7 +104,10 @@ contract Mining is
         );
 
         _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
-        emit MiningEnded(_session[_msgSender()][toolId]);
+        MiningSession memory tmp = _session[_msgSender()][toolId];
+        tmp.started = false;
+        _tools.corrupt(toolId, _session[_msgSender()][toolId].strengthCost);
+        emit MiningEnded(_msgSender(), _session[_msgSender()][toolId]);
         delete _session[_msgSender()][toolId];
     }
 

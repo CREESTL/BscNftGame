@@ -8,7 +8,6 @@ interface ITools is IERC1155Upgradeable {
         uint32 miningResource;
         uint32 strengthCost;
         uint32 maxStrength;
-        // lock time while mining
         uint32 miningDuration;
         uint32 energyCost;
         uint32 energyId;
@@ -20,7 +19,7 @@ interface ITools is IERC1155Upgradeable {
         uint128 strength;
     }
 
-    function getToolProperties(uint256 toolId)
+    function getToolProperties(address user, uint256 toolId)
         external
         view
         returns (
@@ -37,4 +36,8 @@ interface ITools is IERC1155Upgradeable {
         external
         view
         returns (address);
+
+    function increaseArtifactAmount() external;
+
+    function corrupt(uint256 toolId, uint256 strengthCost) external;
 }
