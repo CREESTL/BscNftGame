@@ -3,17 +3,22 @@ const { ethers, upgrades } = require("hardhat");
 require("dotenv").config();
 
 describe("Mining contract tests", async () =>  {
+    let Tools;
     let Mining;
     let BlackList;
-    let Resource;
-    let Gem;
+    let Berry;
+    let Tree;
+    let Gold;
 
+    let tools;
     let mining;
     let blackList;
-    let resource;
-    let gem;
+    let berry;
+    let tree;
+    let gold;
 
     const REWARD_RATE = 12345;
+    const BASE_URI = "ipfs://123/"
 
     beforeEach(async () => {
         Gem = await ethers.getContractFactory("Gem");
@@ -30,14 +35,17 @@ describe("Mining contract tests", async () =>  {
         Mining = await ethers.getContractFactory("Mining");
         mining = await upgrades.deployProxy(Mining, [REWARD_RATE, blackList.address]);
         mining.deployed();
+
+        Tools = await ethers.getContractFactory("Tools");
+        tools = await upgrades.deployProxy(Tools, [blacklist.address, berry.address, tree.address, gold.address, BASE_URI]);
     });
 
-    // it("initialize", async () => {
-    //     let rewardRate = await mining.rewardRate();
-    //     expect(rewardRate).eql(ethers.BigNumber.from(REWARD_RATE));
-    // });
-
-    // it("", async () => {
-    //     let 
-    // });
+    it("start mining", async () => {
+        await tools.mint(address1.address, )
+    });
+    
+    it("", async () => {});
+    it("", async () => {});
+    it("", async () => {});
+    it("", async () => {});
 });
