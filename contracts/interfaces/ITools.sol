@@ -37,7 +37,19 @@ interface ITools is IERC1155Upgradeable {
         view
         returns (address);
 
+    function getArtifactsAddress() external view returns (address);
+
+    function getMiningAddress() external view returns (address);
+
     function increaseArtifactAmount() external;
 
-    function corrupt(uint256 toolId, uint256 strengthCost) external;
+    function corrupt(
+        address user,
+        uint256 toolId,
+        uint256 strengthCost
+    ) external;
+
+    function getArtifactAmount() external view returns (uint256);
+
+    function getResourceAmount() external view returns (uint256);
 }

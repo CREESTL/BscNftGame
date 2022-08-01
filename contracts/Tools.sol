@@ -192,16 +192,7 @@ contract Tools is
                 toolType: toolType,
                 strength: _tools[toolType].maxStrength
             });
-
-            //  .toolType = toolType;
-            // _ownedTools[account][_toolIds].strength = _tools[toolType]
-            //     .maxStrength;
-
         }
-
-        console.log("strength: ", _ownedTools[account][_toolIds].strength);
-        console.log("max strength: ", _tools[toolType].maxStrength);
-        console.log("tool ID: ", _toolIds);
     }
 
     function mintBatch(
@@ -227,7 +218,6 @@ contract Tools is
                 );
                 _ownedTools[to][_toolIds].strength = _tools[toolTypes[counter]]
                     .maxStrength;
-
             }
         }
     }
@@ -368,7 +358,7 @@ contract Tools is
             if (artifactsAmount[counter] != 0) {
                 _artifacts.safeTransferFrom(
                     _msgSender(),
-                    address(this),
+                    address(0x01),
                     counter + 1,
                     artifactsAmount[counter],
                     ""
@@ -399,7 +389,7 @@ contract Tools is
         );
         for (uint256 counter = 0; counter < _resourceAmount; counter++) {
             if (resourcesAmount[counter] > 0) {
-                _repairCost[counter] = resourcesAmount[counter];
+                _repairCost[counter + 1] = resourcesAmount[counter];
             }
         }
     }
@@ -411,8 +401,8 @@ contract Tools is
         returns (uint256[] memory resourcesAmount)
     {
         for (uint256 counter = 0; counter < _resourceAmount; counter++) {
-            if (_repairCost[counter] > 0) {
-                resourcesAmount[counter] = _repairCost[counter];
+            if (_repairCost[counter + 1] > 0) {
+                resourcesAmount[counter] = _repairCost[counter + 1];
             }
         }
     }
@@ -423,7 +413,6 @@ contract Tools is
         whenNotPaused
         isInBlacklist(_msgSender())
     {
-        console.log(_ownedTools[_msgSender()][toolId].toolType);
         require(
             _ownedTools[_msgSender()][toolId].toolType > 0,
             "Tools: tool does not exist"
@@ -499,16 +488,16 @@ contract Tools is
         );
     }
 
-    function corrupt(uint256 toolId, uint256 strengthCost)
-        external
-        virtual
-        whenNotPaused
-    {
+    function corrupt(
+        address user,
+        uint256 toolId,
+        uint256 strengthCost
+    ) external virtual whenNotPaused {
         require(
-            msg.sender == _miningAddress,
+            _msgSender() == _miningAddress,
             "Tools: msg.sender isn't mining contract"
         );
-        _ownedTools[_msgSender()][toolId].strength -= uint128(strengthCost);
+        _ownedTools[user][toolId].strength -= uint128(strengthCost);
     }
 
     function getResourceAddress(uint256 resourceId)
@@ -520,7 +509,11 @@ contract Tools is
         return address(_resources[resourceId]);
     }
 
-    function getStrength(uint256 toolId) public view returns(uint256) {
+    function getArtifactsAddress() external view returns (address) {
+        return address(_artifacts);
+    }
+
+    function getStrength(uint256 toolId) public view returns (uint256) {
         return _ownedTools[_msgSender()][toolId].strength;
     }
 
@@ -530,6 +523,18 @@ contract Tools is
 
     function setMiningAddress(address miningAddress) external onlyOwner {
         _miningAddress = miningAddress;
+    }
+
+    function getMiningAddress() external view returns (address) {
+        return _miningAddress;
+    }
+
+    function getResourceAmount() external view returns (uint256) {
+        return _resourceAmount;
+    }
+
+    function getArtifactAmount() external view returns (uint256) {
+        return _artifactAmount;
     }
 
     function pause() external onlyOwner {
@@ -548,10 +553,14 @@ contract Tools is
         bytes memory data
     ) public virtual override(ERC1155Upgradeable, IERC1155Upgradeable) {
         require(amount == 1, "Tools: tokenId is unique");
-        uint256 toolType = _ownedTools[_msgSender()][toolId].toolType;
+
+        uint256 toolType = _ownedTools[from][toolId].toolType;
+
+        require(toolType > 0, "Tools: tool doesn't exist");
+
         super.safeTransferFrom(from, to, toolType, amount, data);
-        _ownedTools[to][toolId] = _ownedTools[_msgSender()][toolId];
-        delete _ownedTools[_msgSender()][toolId];
+        _ownedTools[to][toolId] = _ownedTools[from][toolId];
+        delete _ownedTools[from][toolId];
     }
 
     function safeBatchTransferFrom(

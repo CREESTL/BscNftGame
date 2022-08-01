@@ -5,11 +5,12 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
 import "./interfaces/ITools.sol";
 import "./interfaces/IBlackList.sol";
-import "./interfaces/IMining.sol";
 import "./interfaces/IResources.sol";
+import "./interfaces/IArtifacts.sol";
 
 import "hardhat/console.sol";
 
@@ -17,16 +18,70 @@ contract Mining is
     Initializable,
     PausableUpgradeable,
     OwnableUpgradeable,
-    IMining
+    IERC1155Receiver
 {
     ITools private _tools;
     IBlackList private _blacklist;
 
+    uint256 private _resourcesAmount;
+    uint256 private _artifactsAmount;
+
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
+    // user address => (resource id => amount)
+    mapping(address => mapping(uint256 => uint256)) awalableResources;
+    // user address => artifacts id
+    mapping(address => uint256) awailibleArtifacts;
+
+    struct MiningSession {
+        uint32 endTime;
+        uint32 rewardRate;
+        uint32 energyCost;
+        uint16 toolType;
+        uint16 strengthCost;
+        bool started;
+    }
 
     event MiningStarted(address user, MiningSession session);
     event MiningEnded(address user, MiningSession session);
+
+    function supportsInterface(bytes4 interfaceId)
+        external
+        pure
+        returns (bool)
+    {
+        return interfaceId == type(IERC165).interfaceId;
+    }
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external pure override returns (bytes4) {
+        return
+            bytes4(
+                keccak256(
+                    "onERC1155Received(address,address,uint256,uint256,bytes)"
+                )
+            );
+    }
+
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) external pure override returns (bytes4) {
+        return
+            bytes4(
+                keccak256(
+                    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"
+                )
+            );
+    }
 
     function initialize(address blacklistAddress, address toolsAddress)
         public
@@ -74,7 +129,7 @@ contract Mining is
         );
 
         _tools.safeTransferFrom(_msgSender(), address(this), toolId, 1, "");
-        resource.transferFrom(_msgSender(), address(0), energyCost);
+        resource.transferFrom(_msgSender(), address(this), energyCost);
 
         _session[_msgSender()][toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
@@ -106,9 +161,65 @@ contract Mining is
         _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
         MiningSession memory tmp = _session[_msgSender()][toolId];
         tmp.started = false;
-        _tools.corrupt(toolId, _session[_msgSender()][toolId].strengthCost);
+        _tools.corrupt(
+            _msgSender(),
+            toolId,
+            _session[_msgSender()][toolId].strengthCost
+        );
         emit MiningEnded(_msgSender(), _session[_msgSender()][toolId]);
         delete _session[_msgSender()][toolId];
+    }
+
+    function setRewards(
+        address user,
+        uint256[] memory resourcesAmount,
+        uint256[] memory artifactsAmount
+    ) external onlyOwner {
+        for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
+            if (resourcesAmount[counter] != 0) {
+                awalableResources[user][counter] = resourcesAmount[counter];
+            }
+        }
+
+        for (uint256 counter = 0; counter < artifactsAmount.length; counter++) {
+            if (artifactsAmount[counter] != 0) {
+                awailibleArtifacts[user] = counter + 1;
+            }
+        }
+    }
+
+    function getRewards() external {
+        IResources resource;
+        IArtifacts artifacts;
+        for (
+            uint256 counter = 0;
+            counter < _tools.getResourceAmount();
+            counter++
+        ) {
+            if (awalableResources[_msgSender()][counter] != 0) {
+                resource = IResources(_tools.getResourceAddress(counter + 1));
+                resource.transfer(
+                    _msgSender(),
+                    awalableResources[_msgSender()][counter]
+                );
+                delete awalableResources[_msgSender()][counter];
+            }
+        }
+
+        for (
+            uint256 counter = 0;
+            counter < _tools.getArtifactAmount();
+            counter++
+        ) {
+            if (awailibleArtifacts[_msgSender()] != 0) {
+                artifacts = IArtifacts(_tools.getArtifactsAddress());
+                artifacts.lootArtifact(
+                    _msgSender(),
+                    awailibleArtifacts[_msgSender()]
+                );
+                delete awailibleArtifacts[_msgSender()];
+            }
+        }
     }
 
     modifier isInBlacklist(address user) {

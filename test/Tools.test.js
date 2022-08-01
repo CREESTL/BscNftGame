@@ -42,6 +42,7 @@ describe("Tools tests", async () => {
         await tools.setArtifactsAddress(artifacts.address);
         await tools.setURI(1, "1.json");
         await tools.setRepairCost([0, 0, 5]);
+        await tools.setMiningAddress(mining.address);
 
         [owner, address1, address2] = await ethers.getSigners();
     });
@@ -196,7 +197,8 @@ describe("Tools tests", async () => {
             await expect(tools.connect(address1).repairTool(1, 5)).to.be.revertedWith("Tools: the tool is already strong enough");
         });
 
-        it.only("repair tool after minig", async () => {
+        it("repair tool after minig", async () => {
+            console.log("berry addr: ", berry.address);
             await berry.mint(address1.address, 400);
             await gold.mint(address1.address, 400);
 
@@ -205,25 +207,46 @@ describe("Tools tests", async () => {
 
             await tools.addTool(1, [], 100, 30, 1, 5, 10);
             await tools.mint(address1.address, 1, 1);
-            
-            await artifacts.connect(address1).setApprovalForAll(mining.address, true);
-            await artifacts.connect(address1).setApprovalForAll(tools.address, true);
+
+            await tools.connect(address1).setApprovalForAll(mining.address, true);
 
             await mining.connect(address1).startMining(1);
-
-            let strenghBefore = await tools.connect(address1).getStrength(1);
-            console.log(strenghBefore);
 
             await network.provider.send("evm_increaseTime", [3600]);
             await network.provider.send("evm_mine");
             
             await mining.connect(address1).endMining(1);
 
-            await tools.repairTool(1, 5);
-            let strenghAfter = await tools.connect(address1).getStrength(1);
-            console.log(strenghAfter);
+            let strenghBefore = await tools.connect(address1).getStrength(1);
 
-            expect(strenghAfter).eql(strenghBefore + 5);
+            await tools.connect(address1).repairTool(1, 1);
+
+            let strenghAfter = await tools.connect(address1).getStrength(1);
+
+            expect(strenghAfter).eql(strenghBefore.add(ethers.BigNumber.from(1)));
+        });
+
+        it("repair tool more than 100%", async () => {
+            console.log("berry addr: ", berry.address);
+            await berry.mint(address1.address, 400);
+            await gold.mint(address1.address, 400);
+
+            await berry.connect(address1).approve(mining.address, 400);
+            await gold.connect(address1).approve(tools.address, 40);
+
+            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.mint(address1.address, 1, 1);
+
+            await tools.connect(address1).setApprovalForAll(mining.address, true);
+
+            await mining.connect(address1).startMining(1);
+
+            await network.provider.send("evm_increaseTime", [3600]);
+            await network.provider.send("evm_mine");
+            
+            await mining.connect(address1).endMining(1);
+
+            await expect(tools.connect(address1).repairTool(1, 10)).to.be.revertedWith("Tools: the tool is already strong enough");
         });
     });
 

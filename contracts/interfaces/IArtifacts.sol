@@ -8,4 +8,6 @@ interface IArtifacts is IERC1155Upgradeable {
         string name;
         uint128 level;
     }
+
+    function lootArtifact(address user, uint256 artifactType) external;
 }

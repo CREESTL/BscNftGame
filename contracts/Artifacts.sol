@@ -11,6 +11,8 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IArtifacts.sol";
 import "./interfaces/ITools.sol";
 
+import "hardhat/console.sol";
+
 contract Artifacts is
     Initializable,
     OwnableUpgradeable,
@@ -125,45 +127,17 @@ contract Artifacts is
         }
     }
 
-    // ----------------------------
-    // override super functions
-    // function setApprovalForAll(address operator, bool approved)
-    //     public
-    //     override(ERC1155Upgradeable, IERC1155Upgradeable)
-    //     isInBlacklist(_msgSender())
-    // {
-    //     super.setApprovalForAll(operator, approved);
-    // }
-
-    // function safeTransferFrom(
-    //     address from,
-    //     address to,
-    //     uint256 id,
-    //     uint256 amount,
-    //     bytes memory data
-    // )
-    //     public
-    //     virtual
-    //     override(ERC1155Upgradeable, IERC1155Upgradeable)
-    //     isInBlacklist(from)
-    // {
-    //     super.safeTransferFrom(from, to, id, amount, data);
-    // }
-
-    // function safeBatchTransferFrom(
-    //     address from,
-    //     address to,
-    //     uint256[] memory ids,
-    //     uint256[] memory amounts,
-    //     bytes memory data
-    // )
-    //     public
-    //     virtual
-    //     override(ERC1155Upgradeable, IERC1155Upgradeable)
-    //     isInBlacklist(from)
-    // {
-    //     super.safeBatchTransferFrom(from, to, ids, amounts, data);
-    // }
+    function lootArtifact(address user, uint256 artifactType) external {
+        require(
+            _msgSender() == _tools.getMiningAddress(),
+            "Artifacts: only mining contract can call this function"
+        );
+        _mint(user, artifactType, 1, "");
+        _ownedArtifacts[user][artifactType] = Artifact({
+            name: _artifactsName[artifactType],
+            level: uint128(_artifactsLevel[artifactType])
+        });
+    }
 
     // ----------------------------
     // administration
