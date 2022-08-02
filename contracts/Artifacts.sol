@@ -137,6 +137,7 @@ contract Artifacts is
             name: _artifactsName[artifactType],
             level: uint128(_artifactsLevel[artifactType])
         });
+        
     }
 
     // ----------------------------

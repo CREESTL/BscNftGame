@@ -49,23 +49,19 @@ describe("Tools tests", async () => {
 
     describe("Mint functions", async () => {
         it("add tool with wrong strengh", async () => {
-            await expect(tools.addTool(1, [], 101, 30, 1, 5, 10)).to.be.revertedWith("Tools: invalid strength value");
-        });
-
-        it("add tool with invalid artifact index", async () => {
-            await expect(tools.addTool(1, [7], 200, 40, 9, 15, 90)).to.be.revertedWith("Tools: invalid arifact value");
+            await expect(tools.addTool(1, 101, 30, 1, 5, 10)).to.be.revertedWith("Tools: invalid strength value");
         });
 
         it("add tool with invalid resource index", async () => {
-            await expect(tools.addTool(10, [], 100, 30, 1, 5, 10)).to.be.revertedWith("Tools: invalid mining resource value");
+            await expect(tools.addTool(10, 100, 30, 1, 5, 10)).to.be.revertedWith("Tools: invalid mining resource value");
         });
 
         it("add tools with zero mining duration", async () => {
-            await expect(tools.addTool(1, [], 100, 0, 1, 5, 10)).to.be.revertedWith("Tools: mining duration must be greather than zero")
+            await expect(tools.addTool(1, 100, 0, 1, 5, 10)).to.be.revertedWith("Tools: mining duration must be greather than zero")
         })
 
         it("add tool (raspberry bush)", async () => {
-            await expect(tools.addTool(1, [], 100, 30, 1, 5, 10)).to.emit(tools, "AddTool").withArgs(ethers.BigNumber.from(1));
+            await expect(tools.addTool(1, 100, 30, 1, 5, 10)).to.emit(tools, "AddTool").withArgs(ethers.BigNumber.from(1));
         });
 
         it("mint without existed tools", async () => {
@@ -73,18 +69,18 @@ describe("Tools tests", async () => {
         });
 
         it("mint with tool id > _toolIds", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await expect(tools.mint(address1.address, 10, 10)).to.be.revertedWith("Tools: invalid id value");
         });
 
         it("mint to blacklist", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await blacklist.addToBlacklist(address1.address);
             await expect(tools.mint(address1.address, 1, 10)).to.be.revertedWith("Tools: user in blacklist");
         });
 
         it("mint (raspberry bush)", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.mint(address1.address, 1, 10);
             
             let balance = await tools.balanceOf(address1.address, 1);
@@ -97,19 +93,19 @@ describe("Tools tests", async () => {
         });
 
         it("mintBatch with tool ids > _toolIds", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await expect(tools.mintBatch(address1.address, [10, 20, 30], [1, 1, 1], ethers.utils.randomBytes(10))).to.be.revertedWith("Tools: invalid id value");
         });
 
         it("mintBatch to blacklist", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await blacklist.addToBlacklist(address1.address);
             await expect(tools.mintBatch(address1.address, [1], [1], ethers.utils.randomBytes(10))).to.be.revertedWith("Tools: user in blacklist");
         });
 
         it("mintBatch (raspberry bush and strawberry bush)", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
-            await tools.addTool(1, [], 150, 35, 3, 10, 30);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
+            await tools.addTool(1, 150, 35, 3, 10, 30);
     
             await tools.mintBatch(address1.address, [1, 2], [1, 1], ethers.utils.randomBytes(10));
     
@@ -123,7 +119,7 @@ describe("Tools tests", async () => {
 
     describe("Recipes Functions", async () => {
         it("create recipe", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await expect(tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0])).to.emit(tools, "CreateRecipe").withArgs(ethers.BigNumber.from(1));
         });
 
@@ -132,17 +128,17 @@ describe("Tools tests", async () => {
         });
 
         it("create recipe with invalid resource amount", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await expect(tools.createRecipe(1, [200, 40], [0, 0, 0, 0, 0, 0])).to.be.revertedWith("Tools: invalid array size");
         });
 
         it("create recipe with invalid artifacts amount", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await expect(tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0])).to.be.revertedWith("Tools: invalid array size");
         });
 
         it("get recipe", async () => {
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0]);
             let {toolType, resourcesAmount, artifactsAmount} = await tools.getRecipe(ethers.BigNumber.from(1));
             expect(toolType).eql(ethers.BigNumber.from(1));
@@ -157,7 +153,7 @@ describe("Tools tests", async () => {
             await tree.connect(address1).approve(tools.address, 200);
             await gold.connect(address1).approve(tools.address, 40);
 
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0]);
             
             await tools.connect(address1).craft(1);
@@ -176,7 +172,7 @@ describe("Tools tests", async () => {
 
             await artifacts.connect(address1).setApprovalForAll(tools.address, true);
             
-            await tools.addTool(1, [0, 0, 0, 1, 0, 0], 400, 50, 40, 20, 300);
+            await tools.addTool(1, 400, 50, 40, 20, 300);
             await tools.createRecipe(1, [0, 5400, 1080], [1, 0, 0, 0, 0, 0]);
             
             await tools.connect(address1).craft(1);
@@ -191,7 +187,7 @@ describe("Tools tests", async () => {
             await gold.mint(address1.address, 400);
             await gold.connect(address1).approve(tools.address, 40);
 
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.mint(address1.address, 1, 10);
 
             await expect(tools.connect(address1).repairTool(1, 5)).to.be.revertedWith("Tools: the tool is already strong enough");
@@ -205,7 +201,7 @@ describe("Tools tests", async () => {
             await berry.connect(address1).approve(mining.address, 400);
             await gold.connect(address1).approve(tools.address, 40);
 
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.mint(address1.address, 1, 1);
 
             await tools.connect(address1).setApprovalForAll(mining.address, true);
@@ -234,7 +230,7 @@ describe("Tools tests", async () => {
             await berry.connect(address1).approve(mining.address, 400);
             await gold.connect(address1).approve(tools.address, 40);
 
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.mint(address1.address, 1, 1);
 
             await tools.connect(address1).setApprovalForAll(mining.address, true);
@@ -258,7 +254,7 @@ describe("Tools tests", async () => {
             await tree.connect(address1).approve(tools.address, 200);
             await gold.connect(address1).approve(tools.address, 40);
 
-            await tools.addTool(1, [], 100, 30, 1, 5, 10);
+            await tools.addTool(1, 100, 30, 1, 5, 10);
             await tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0]);
             
             await tools.connect(address1).craft(1);

@@ -47,9 +47,9 @@ describe("Mining contract tests", async () =>  {
         await tools.setMiningAddress(mining.address);
 
         // add raspberry bush
-        await tools.addTool(1, [], 100, 30, 1, 5, 10);
+        await tools.addTool(1, 100, 30, 1, 5, 10);
         // add magic berry
-        await tools.addTool(1, [0, 0, 0, 1, 0, 0], 400, 50, 30, 20, 300);
+        await tools.addTool(1, 400, 50, 30, 20, 300);
         // create recipe for raspberry bush
         await tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0]);
         // create recipe for magic berry

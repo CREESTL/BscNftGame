@@ -141,7 +141,6 @@ contract Tools is
 
     function addTool(
         uint32 miningResource,
-        uint32[] calldata miningArtifacts,
         uint32 maxStrength,
         uint32 miningDuration,
         uint32 energyCost,
@@ -152,12 +151,6 @@ contract Tools is
             miningResource <= _resourceAmount,
             "Tools: invalid mining resource value"
         );
-        for (uint256 counter = 0; counter < miningArtifacts.length; counter++) {
-            require(
-                miningArtifacts[counter] <= _artifactAmount,
-                "Tools: invalid arifact value"
-            );
-        }
         require(maxStrength % 5 == 0, "Tools: invalid strength value");
         require(
             miningDuration > 0,
