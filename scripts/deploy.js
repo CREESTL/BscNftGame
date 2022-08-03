@@ -7,18 +7,37 @@
 const {upgrades, ethers} = require("hardhat");
 
 async function main() {
-  const BlackList = await ethers.getContractFactory("BlackList");
-  const blacklist = await BlackList.deploy();
-
-  await blacklist.deployed();
-  console.log("blacklist deployed to:", blacklist.address);
-
-
+  const Gem = await ethers.getContractFactory("Gem");
+  const Berry = await ethers.getContractFactory("PocMon");
+  const Tree = await ethers.getContractFactory("PocMon");
+  const Gold = await ethers.getContractFactory("PocMon");
   const Artifacts = await ethers.getContractFactory("Artifacts");
-  const artifacts = await upgrades.deployProxy(Artifacts, [process.env.BASE_URL, blacklist.address]);
+  const Blacklist = await ethers.getContractFactory("BlackList");
+  const Tools = await ethers.getContractFactory("Tools");
+  const Mining = await ethers.getContractFactory("Mining");
 
-  await artifacts.deployed();
-  console.log("artifacts deployed to:", artifacts.address);
+  const gem = await Gem.deploy(1);
+  const berry = await Berry.deploy(process.env.PANCAKE_ROUTER, gem.address, process.env.PUBLIC_KEY, process.env.PUBLIC_KEY);
+  const tree = await Tree.deploy(process.env.PANCAKE_ROUTER, gem.address, process.env.PUBLIC_KEY, process.env.PUBLIC_KEY);
+  const gold = await Gold.deploy(process.env.PANCAKE_ROUTER, gem.address, process.env.PUBLIC_KEY, process.env.PUBLIC_KEY);
+  const blacklist = await Blacklist.deploy();
+
+  const tools = await upgrades.deployProxy(Tools, [blacklist.address, berry.address, tree.address, gold.address, process.env.BASE_URI]);
+  const artifacts = await upgrades.deployProxy(Artifacts, [process.env.BASE_URI, blacklist.address]);
+  const mining = await upgrades.deployProxy(Mining, [blacklist.address, tools.address]);
+
+  console.log("tools address: ", tools.address);
+  console.log("artifacts address: ", artifacts.address);
+  console.log("mining address: ", mining.address);
+  console.log("blacklist address: ", blacklist.address);
+  // // add raspberry bush
+  // await tools.addTool(1, 100, 30, 1, 5, 10);
+  // // add magic berry
+  // await tools.addTool(1, 400, 50, 30, 20, 300);
+  // // create recipe for raspberry bush
+  // await tools.createRecipe(1, [0, 200, 40], [0, 0, 0, 0, 0, 0]);
+  // // create recipe for magic berry
+  // await tools.createRecipe(2, [0, 5400, 1080], [1, 0, 0, 0, 0, 0]);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
