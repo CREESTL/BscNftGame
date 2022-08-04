@@ -141,3 +141,34 @@ function setRewards(
 
     function removeFromBlacklist(address user) external onlyOwner
 ```
+
+# Инструкция к деплою
+
+1) Установить все зависимости через npm
+```
+npm i
+```
+
+2) Создать в корне проекта файл ```.env```
+3) Заполнить файл конфигурации по шаблону
+```
+# hardhat.confing
+REPORT_GAS=true
+
+# BSC URL's
+TESTNET_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
+MAINNET_URL= https://bsc-dataseed.binance.org/
+
+BASE_URI=https://123.com/
+
+PRIVATE_KEY=21dfd98724dd553c110e1959ad892a213113e1a4e137cec739d29af909b96ec
+PUBLIC_KEY=0xf8139f9d650B321c07239Ef6290ce33cC6A4B507
+API_KEY=IMGMLKIH9FB2ECPBABB771T3AF5WT87KAA
+
+PANCAKE_ROUTER=0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+```
+4) Запуск деплоя в тестовую сеть
+```
+npx hardhat run script/deploy.js --network testnet
+```
+
