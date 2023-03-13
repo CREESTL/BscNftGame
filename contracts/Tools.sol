@@ -34,9 +34,8 @@ contract Tools is
     address private _miningAddress;
 
     struct Recipe {
-        uint256 toolType;
         // resource id => amount
-        mapping(uint256 => uint256) resources;
+        uint256 resourcesAmount;
         // artifacts id => amonut
         mapping(uint256 => uint256) artifacts;
     }
@@ -47,8 +46,6 @@ contract Tools is
     uint256 private _toolTypes;
     // artifacts counter
     uint256 private _artifactAmount;
-    // recipes counter
-    uint256 private _recipeAmount;
     // resources counter
     uint256 private _resourceAmount;
 
@@ -60,7 +57,7 @@ contract Tools is
     mapping(uint256 => string) private _tokenURIs;
     // tool type => Tool
     mapping(uint256 => Tool) private _tools;
-    // recipe id => Recipe
+    // recipe toolType => Recipe
     mapping(uint256 => Recipe) private _recipes;
 
     // user address => (tool id => OwnedTool)
@@ -68,8 +65,15 @@ contract Tools is
 
     event AddTool(uint256 toolType);
     event Craft(address user, uint256);
-    event CreateRecipe(uint256 recipeId);
+    event RecipeCreatedOrUpdated(uint256 toolType, uint256[] calldata resourcesAmount, uint256[] calldata artifactsAmount);
     event BaseURI(string baseURI);
+    event ToolRepaired(uint256 toolId);
+    event ToolPropertiesSet(uint256 toolType);
+
+    modifier isInBlacklist(address user) {
+        require(!_blacklist.check(user), "Tools: user in blacklist");
+        _;
+    }
 
     function onERC1155Received(
         address operator,
@@ -145,7 +149,9 @@ contract Tools is
         uint32 miningDuration,
         uint32 energyCost,
         uint32 strengthCost,
-        uint32 rewardRate
+        uint32 rewardRate,
+        uint256[] calldata resourcesAmount,
+        uint256[] calldata artifactsAmount
     ) external virtual onlyOwner returns (uint256) {
         require(
             miningResource <= _resourceAmount,
@@ -167,21 +173,53 @@ contract Tools is
         _tools[newType].rewardRate = rewardRate;
 
         emit AddTool(newType);
+        createRecipe(newType, resourcesAmount, artifactsAmount);
         return newType;
     }
 
+    function setToolProperties(
+        uint256 toolType,
+        uint32 miningResource,
+        uint32 maxStrength,
+        uint32 miningDuration,
+        uint32 energyCost,
+        uint32 strengthCost,
+        uint32 rewardRate,
+
+    ) external virtual onlyOwner {
+        require(toolType <= _toolTypes, "Tools: invalid id value");
+        require(
+            miningResource <= _resourceAmount,
+            "Tools: invalid mining resource value"
+        );
+        require(maxStrength % 5 == 0, "Tools: invalid strength value");
+        require(
+            miningDuration > 0,
+            "Tools: mining duration must be greather than zero"
+        );
+
+        _tools[toolType].miningResource = miningResource;
+        _tools[toolType].maxStrength = maxStrength;
+        _tools[toolType].miningDuration = miningDuration;
+        _tools[toolType].energyCost = energyCost;
+        _tools[toolType].strengthCost = strengthCost;
+        _tools[toolType].rewardRate = rewardRate;
+
+        emit ToolPropertiesSet(toolType);
+    }
+
     function mint(
-        address account,
+        address to,
         uint128 toolType,
         uint256 amount
-    ) public virtual onlyOwner isInBlacklist(account) {
+    ) public virtual onlyOwner isInBlacklist(to) {
         require(_toolTypes != 0, "Tools: no tools");
         require(toolType <= _toolTypes, "Tools: invalid id value");
 
-        _mint(account, toolType, amount, "");
+        _mint(to, toolType, amount, "");
         for (uint256 counter = 0; counter < amount; counter++) {
             _toolIds++;
-            _ownedTools[account][_toolIds] = OwnedTool({
+            _ownedTools[to][_toolIds] = OwnedTool({
                 toolType: toolType,
                 strength: _tools[toolType].maxStrength
             });
@@ -255,67 +293,48 @@ contract Tools is
 
     function createRecipe(
         uint256 toolType,
-        uint256[] calldata resourcesAmount,
+        uint256 resourcesAmount,
         uint256[] calldata artifactsAmount
-    ) external virtual onlyOwner {
+    ) public virtual onlyOwner {
         require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
         require(
             resourcesAmount.length == _resourceAmount &&
                 artifactsAmount.length == _artifactAmount,
             "Tools: invalid array size"
         );
-        _recipeAmount++;
 
-        _recipes[_recipeAmount].toolType = toolType;
-
-        for (uint256 counter = 0; counter < _resourceAmount; counter++) {
-            if (resourcesAmount[counter] > 0) {
-                _recipes[_recipeAmount].resources[counter] = resourcesAmount[
-                    counter
-                ];
-            }
-        }
+        _recipes[toolType].resourcesAmount = resourcesAmount
 
         for (uint256 counter = 0; counter < _artifactAmount; counter++) {
             if (artifactsAmount[counter] > 0) {
-                _recipes[_recipeAmount].artifacts[counter] = artifactsAmount[
+                _recipes[toolType].artifacts[counter] = artifactsAmount[
                     counter
                 ];
             }
         }
 
-        emit CreateRecipe(_recipeAmount);
+        emit RecipeCreatedOrUpdated(toolType, resourcesAmount, artifactsAmount);
     }
 
-    function getRecipe(uint256 recipeId)
+    function getRecipe(uint256 toolType)
         public
         view
         virtual
         whenNotPaused
         returns (
             uint256 toolType,
-            uint256[] memory resourcesAmount,
+            uint256 resourcesAmount,
             uint256[] memory artifactsAmount
         )
     {
-        require(recipeId <= _recipeAmount, "Tools: invalid recipieId value");
-
-        toolType = _recipes[recipeId].toolType;
-
         resourcesAmount = new uint256[](_resourceAmount);
         artifactsAmount = new uint256[](_artifactAmount);
 
-        for (uint256 counter = 0; counter <= _resourceAmount; counter++) {
-            if (_recipes[recipeId].resources[counter] > 0) {
-                resourcesAmount[counter] = _recipes[recipeId].resources[
-                    counter
-                ];
-            }
-        }
+        resourcesAmount = _recipes[toolType].resourcesAmount;
 
         for (uint256 counter = 0; counter < _artifactAmount; counter++) {
-            if (_recipes[recipeId].artifacts[counter] > 0) {
-                artifactsAmount[counter] = _recipes[recipeId].artifacts[
+            if (_recipes[toolType].artifacts[counter] > 0) {
+                artifactsAmount[counter] = _recipes[toolType].artifacts[
                     counter
                 ];
             }
@@ -327,25 +346,22 @@ contract Tools is
         whenNotPaused
         isInBlacklist(_msgSender())
     {
-        uint256[] memory resourcesAmount;
+        uint256 resourcesAmount;
         uint256[] memory artifactsAmount;
 
-        for (uint256 counter = 1; counter <= _recipeAmount; counter++) {
-            if (_recipes[counter].toolType == toolType) {
-                (, resourcesAmount, artifactsAmount) = getRecipe(counter);
-                break;
-            }
-        }
+        (, resourcesAmount, artifactsAmount) = getRecipe(toolType);
 
-        for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
-            if (resourcesAmount[counter] != 0) {
-                _resources[counter + 1].transferFrom(
-                    _msgSender(),
-                    address(this),
-                    resourcesAmount[counter]
-                );
-            }
-        }
+        _resources[3].transferFrom(
+            _msgSender(),
+            address(this),
+           resourcesAmount
+        );
+
+        _resources[2].transferFrom(
+            _msgSender(),
+            address(this),
+            resourcesAmount * 5
+        );       
 
         for (uint256 counter = 0; counter < artifactsAmount.length; counter++) {
             if (artifactsAmount[counter] != 0) {
@@ -371,79 +387,43 @@ contract Tools is
     }
 
     // ----------- Repair Functions -----------
-    function setRepairCost(uint256[] memory resourcesAmount)
-        public
-        virtual
-        onlyOwner
-    {
-        require(
-            resourcesAmount.length == _resourceAmount,
-            "Tools: invalid array size"
-        );
-        for (uint256 counter = 0; counter < _resourceAmount; counter++) {
-            if (resourcesAmount[counter] > 0) {
-                _repairCost[counter + 1] = resourcesAmount[counter];
-            }
-        }
-    }
-
-    function getRepairCost()
-        public
-        view
-        virtual
-        returns (uint256[] memory resourcesAmount)
-    {
-        for (uint256 counter = 0; counter < _resourceAmount; counter++) {
-            if (_repairCost[counter + 1] > 0) {
-                resourcesAmount[counter] = _repairCost[counter + 1];
-            }
-        }
-    }
-
-    function repairTool(uint256 toolId, uint256 repairValue)
+    function repairTool(uint256 toolId)
         public
         virtual
         whenNotPaused
         isInBlacklist(_msgSender())
     {
+        uint256 toolTypeId = _ownedTools[_msgSender()][toolId].toolType;
         require(
-            _ownedTools[_msgSender()][toolId].toolType > 0,
+            toolTypeId > 0,
             "Tools: tool does not exist"
         );
+        uint128 maxStrength = _tools[_ownedTools[_msgSender()][toolId].toolType].maxStrength;
+        uint256 auraAmount = (maxStrength - _ownedTools[_msgSender()][toolId].strength) / 5;
 
-        require(
-            _ownedTools[_msgSender()][toolId].strength + repairValue <=
-                _tools[_ownedTools[_msgSender()][toolId].toolType].maxStrength,
-            "Tools: the tool is already strong enough"
+        require(repairValue != 0, "Tools: the tool is already strong enough");
+
+        _resources[3].transferFrom(
+            _msgSender(),
+            address(0),
+            auraAmount
         );
 
-        for (uint256 counter = 1; counter <= _resourceAmount; counter++) {
-            if (_repairCost[counter] > 0) {
-                uint256 amount = _repairCost[counter] * repairValue;
-                _resources[counter].transferFrom(
-                    _msgSender(),
-                    address(this),
-                    amount
-                );
-            }
-        }
-        _ownedTools[_msgSender()][toolId].strength += uint128(repairValue);
+        _ownedTools[_msgSender()][toolId].strength = maxStrength;
+        emit ToolRepaired(toolId);
     }
 
     // ----------- Utils Functions -----------
 
-    function increaseArtifactAmount() external onlyOwner {
+    function increaseArtifactAmount() external {
+        require(msg.sender == address(_artifacts), "Tools: caller is not an Artifacts contract");
         _artifactAmount++;
     }
 
     function increaseResourceAmount(address newResource) external onlyOwner {
         require(newResource != address(0), "Tools: invalid address");
         _resourceAmount++;
-        _resources[_recipeAmount] = IResources(newResource);
-    }
-
-    function getRecipieAmount() public view returns (uint256) {
-        return _recipeAmount;
+        _resources[_resourceAmount] = IResources(newResource);
     }
 
     function getToolProperties(address user, uint256 toolId)
@@ -488,7 +468,7 @@ contract Tools is
     ) external virtual whenNotPaused {
         require(
             _msgSender() == _miningAddress,
-            "Tools: msg.sender isn't mining contract"
+            "Tools: msg.sender isn't Mining contract"
         );
         _ownedTools[user][toolId].strength -= uint128(strengthCost);
     }
@@ -566,10 +546,5 @@ contract Tools is
         for (uint256 count = 0; count < toolTypes.length; count++) {
             safeTransferFrom(from, to, toolTypes[count], amounts[count], data);
         }
-    }
-
-    modifier isInBlacklist(address user) {
-        require(!_blacklist.check(user), "Tools: user in blacklist");
-        _;
     }
 }

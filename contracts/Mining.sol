@@ -102,7 +102,12 @@ contract Mining is
         _unpause();
     }
 
-    function startMining(uint256 toolId)
+    function startMining(
+        uint256 toolId, 
+        address user,
+        uint256[] memory resourcesAmount,
+        uint256[] memory artifactsAmount
+    )
         external
         virtual
         whenNotPaused
@@ -139,7 +144,7 @@ contract Mining is
             strengthCost: uint16(strengthCost),
             started: true
         });
-
+        setRewards(user, resourcesAmount, artifactsAmount);
         emit MiningStarted(_msgSender(), _session[_msgSender()][toolId]);
     }
 
@@ -174,7 +179,7 @@ contract Mining is
         address user,
         uint256[] memory resourcesAmount,
         uint256[] memory artifactsAmount
-    ) external onlyOwner {
+    ) private {
         for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
             if (resourcesAmount[counter] != 0) {
                 awalableResources[user][counter] = resourcesAmount[counter];
