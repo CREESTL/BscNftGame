@@ -123,4 +123,8 @@ contract Artifacts is
                 )
             );
     }
+
+    function getArtifactsTypesAmount() external view returns (uint256) {
+        return _artifactTypes;
+    }
 }

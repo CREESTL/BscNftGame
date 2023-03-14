@@ -65,7 +65,7 @@ contract Tools is
 
     event AddTool(uint256 toolType);
     event Craft(address user, uint256);
-    event RecipeCreatedOrUpdated(uint256 toolType, uint256[] calldata resourcesAmount, uint256[] calldata artifactsAmount);
+    event RecipeCreatedOrUpdated(uint256 toolType, uint256[] resourcesAmount, uint256[] artifactsAmount);
     event BaseURI(string baseURI);
     event ToolRepaired(uint256 toolId);
     event ToolPropertiesSet(uint256 toolType);
@@ -144,19 +144,14 @@ contract Tools is
     // ----------- Mint functions -----------
 
     function addTool(
-        uint32 miningResource,
         uint32 maxStrength,
         uint32 miningDuration,
         uint32 energyCost,
         uint32 strengthCost,
-        uint32 rewardRate,
         uint256[] calldata resourcesAmount,
-        uint256[] calldata artifactsAmount
+        uint256[] calldata artifactsAmount,
+        string calldata newURI
     ) external virtual onlyOwner returns (uint256) {
-        require(
-            miningResource <= _resourceAmount,
-            "Tools: invalid mining resource value"
-        );
         require(maxStrength % 5 == 0, "Tools: invalid strength value");
         require(
             miningDuration > 0,
@@ -165,45 +160,35 @@ contract Tools is
 
         _toolTypes++;
         uint256 newType = _toolTypes;
-        _tools[newType].miningResource = miningResource;
         _tools[newType].maxStrength = maxStrength;
         _tools[newType].miningDuration = miningDuration;
         _tools[newType].energyCost = energyCost;
         _tools[newType].strengthCost = strengthCost;
-        _tools[newType].rewardRate = rewardRate;
 
         emit AddTool(newType);
-        createRecipe(newType, resourcesAmount, artifactsAmount);
+        setURI(newType, newURI);
+        setRecipe(newType, resourcesAmount, artifactsAmount);
         return newType;
     }
 
     function setToolProperties(
         uint256 toolType,
-        uint32 miningResource,
         uint32 maxStrength,
         uint32 miningDuration,
         uint32 energyCost,
-        uint32 strengthCost,
-        uint32 rewardRate,
-
+        uint32 strengthCost
     ) external virtual onlyOwner {
         require(toolType <= _toolTypes, "Tools: invalid id value");
-        require(
-            miningResource <= _resourceAmount,
-            "Tools: invalid mining resource value"
-        );
         require(maxStrength % 5 == 0, "Tools: invalid strength value");
         require(
             miningDuration > 0,
             "Tools: mining duration must be greather than zero"
         );
 
-        _tools[toolType].miningResource = miningResource;
         _tools[toolType].maxStrength = maxStrength;
         _tools[toolType].miningDuration = miningDuration;
         _tools[toolType].energyCost = energyCost;
         _tools[toolType].strengthCost = strengthCost;
-        _tools[toolType].rewardRate = rewardRate;
 
         emit ToolPropertiesSet(toolType);
     }
@@ -291,7 +276,7 @@ contract Tools is
 
     // ----------- Recipes Functions -----------
 
-    function createRecipe(
+    function setRecipe(
         uint256 toolType,
         uint256 resourcesAmount,
         uint256[] calldata artifactsAmount
@@ -303,7 +288,7 @@ contract Tools is
             "Tools: invalid array size"
         );
 
-        _recipes[toolType].resourcesAmount = resourcesAmount
+        _recipes[toolType].resourcesAmount = resourcesAmount;
 
         for (uint256 counter = 0; counter < _artifactAmount; counter++) {
             if (artifactsAmount[counter] > 0) {
@@ -353,13 +338,13 @@ contract Tools is
 
         _resources[3].transferFrom(
             _msgSender(),
-            address(this),
+            address(0),
            resourcesAmount
         );
 
         _resources[2].transferFrom(
             _msgSender(),
-            address(this),
+            address(0),
             resourcesAmount * 5
         );       
 
@@ -367,7 +352,7 @@ contract Tools is
             if (artifactsAmount[counter] != 0) {
                 _artifacts.safeTransferFrom(
                     _msgSender(),
-                    address(0x01),
+                    address(0),
                     counter + 1,
                     artifactsAmount[counter],
                     ""
@@ -401,7 +386,7 @@ contract Tools is
         uint128 maxStrength = _tools[_ownedTools[_msgSender()][toolId].toolType].maxStrength;
         uint256 auraAmount = (maxStrength - _ownedTools[_msgSender()][toolId].strength) / 5;
 
-        require(repairValue != 0, "Tools: the tool is already strong enough");
+        require(auraAmount != 0, "Tools: the tool is already strong enough");
 
         _resources[3].transferFrom(
             _msgSender(),
@@ -434,10 +419,8 @@ contract Tools is
             uint256 toolType,
             uint256 strength,
             uint256 strengthCost,
-            uint256 miningResource,
             uint256 miningDuration,
-            uint256 energyCost,
-            uint256 rewardRate
+            uint256 energyCost
         )
     {
         toolType = _ownedTools[user][toolId].toolType;
@@ -445,19 +428,15 @@ contract Tools is
         strength = _ownedTools[user][toolId].strength;
 
         strengthCost = _tools[toolType].strengthCost;
-        miningResource = _tools[toolType].miningResource;
         miningDuration = _tools[toolType].miningDuration;
         energyCost = _tools[toolType].energyCost;
-        rewardRate = _tools[toolType].rewardRate;
 
         return (
             toolType,
             strength,
             strengthCost,
-            miningResource,
             miningDuration,
-            energyCost,
-            rewardRate
+            energyCost
         );
     }
 
@@ -508,6 +487,10 @@ contract Tools is
 
     function getArtifactAmount() external view returns (uint256) {
         return _artifactAmount;
+    }
+
+    function getToolsTypesAmount() external view returns (uint256) {
+        return _toolTypes;
     }
 
     function pause() external onlyOwner {

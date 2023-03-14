@@ -23,8 +23,8 @@ contract Mining is
     ITools private _tools;
     IBlackList private _blacklist;
 
-    uint256 private _resourcesAmount;
-    uint256 private _artifactsAmount;
+    //uint256 private _resourcesAmount;
+    //uint256 private _artifactsAmount;
 
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
@@ -35,7 +35,6 @@ contract Mining is
 
     struct MiningSession {
         uint32 endTime;
-        uint32 rewardRate;
         uint32 energyCost;
         uint16 toolType;
         uint16 strengthCost;
@@ -110,42 +109,40 @@ contract Mining is
     )
         external
         virtual
+        onlyOwner
         whenNotPaused
-        isInBlacklist(_msgSender())
+        isInBlacklist(user)
     {
         require(
-            !_session[_msgSender()][toolId].started,
+            !_session[user][toolId].started,
             "Mining: this user already started mining process"
         );
         (
             uint256 toolType,
             uint256 strength,
             uint256 strengthCost,
-            uint256 miningResource,
             uint256 miningDuration,
-            uint256 energyCost,
-            uint256 rewardRate
-        ) = _tools.getToolProperties(_msgSender(), toolId);
+            uint256 energyCost
+        ) = _tools.getToolProperties(user, toolId);
 
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
         IResources resource = IResources(
-            _tools.getResourceAddress(miningResource)
+            _tools.getResourceAddress(1)
         );
 
-        _tools.safeTransferFrom(_msgSender(), address(this), toolId, 1, "");
-        resource.transferFrom(_msgSender(), address(this), energyCost);
+        _tools.safeTransferFrom(user, address(this), toolId, 1, "");
+        resource.transferFrom(user, address(0), energyCost);
 
-        _session[_msgSender()][toolId] = MiningSession({
+        _session[user][toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
-            rewardRate: uint32(rewardRate),
             energyCost: uint32(energyCost),
             toolType: uint16(toolType),
             strengthCost: uint16(strengthCost),
             started: true
         });
         setRewards(user, resourcesAmount, artifactsAmount);
-        emit MiningStarted(_msgSender(), _session[_msgSender()][toolId]);
+        emit MiningStarted(user, _session[user][toolId]);
     }
 
     function endMining(uint256 toolId)

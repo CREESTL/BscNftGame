@@ -5,13 +5,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 
 interface ITools is IERC1155Upgradeable {
     struct Tool {
-        uint32 miningResource;
         uint32 strengthCost;
         uint32 maxStrength;
         uint32 miningDuration;
         uint32 energyCost;
         uint32 energyId;
-        uint32 rewardRate;
     }
 
     struct OwnedTool {
@@ -26,10 +24,8 @@ interface ITools is IERC1155Upgradeable {
             uint256 toolType,
             uint256 strength,
             uint256 strengthCost,
-            uint256 miningResource,
             uint256 miningDuration,
-            uint256 energyCost,
-            uint256 rewardRate
+            uint256 energyCost
         );
 
     function getResourceAddress(uint256 resourceId)
