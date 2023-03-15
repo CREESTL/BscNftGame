@@ -45,7 +45,7 @@ interface ITools is IERC1155Upgradeable {
         uint256 strengthCost
     ) external;
 
-    function getArtifactAmount() external view returns (uint256);
+    function getArtifactsTypesAmount() external view returns (uint256);
 
     function getResourceAmount() external view returns (uint256);
 }

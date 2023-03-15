@@ -26,12 +26,13 @@ contract Mining is
     //uint256 private _resourcesAmount;
     //uint256 private _artifactsAmount;
 
+    address private _zeroAddress;
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
     // user address => (resource id => amount)
     mapping(address => mapping(uint256 => uint256)) awalableResources;
-    // user address => artifacts id
-    mapping(address => uint256) awailibleArtifacts;
+    // user address => artifacts type => amount
+    mapping(address => mapping(uint256 => uint256)) awailibleArtifacts;
 
     struct MiningSession {
         uint32 endTime;
@@ -86,6 +87,7 @@ contract Mining is
         public
         initializer
     {
+        _zeroAddress = 0x000000000000000000000000000000000000dEaD;
         _tools = ITools(toolsAddress);
         _blacklist = IBlackList(blacklistAddress);
 
@@ -93,12 +95,12 @@ contract Mining is
         __Ownable_init();
     }
 
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    function unpause() public onlyOwner {
-        _unpause();
+    function pause() external onlyOwner {
+        if (!paused()) {
+            _pause();
+        } else {
+            _unpause();
+        }
     }
 
     function startMining(
@@ -132,7 +134,7 @@ contract Mining is
         );
 
         _tools.safeTransferFrom(user, address(this), toolId, 1, "");
-        resource.transferFrom(user, address(0), energyCost);
+        resource.transferFrom(user, _zeroAddress, energyCost);
 
         _session[user][toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
@@ -160,6 +162,8 @@ contract Mining is
             "Mining: too early"
         );
 
+    ///@dev check
+        
         _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
         MiningSession memory tmp = _session[_msgSender()][toolId];
         tmp.started = false;
@@ -168,6 +172,7 @@ contract Mining is
             toolId,
             _session[_msgSender()][toolId].strengthCost
         );
+        
         emit MiningEnded(_msgSender(), _session[_msgSender()][toolId]);
         delete _session[_msgSender()][toolId];
     }
@@ -179,13 +184,13 @@ contract Mining is
     ) private {
         for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
             if (resourcesAmount[counter] != 0) {
-                awalableResources[user][counter] = resourcesAmount[counter];
+                awalableResources[user][counter] += resourcesAmount[counter];
             }
         }
 
-        for (uint256 counter = 0; counter < artifactsAmount.length; counter++) {
+        for (uint256 counter = 0; counter < _tools.getArtifactsTypesAmount(); counter++) {
             if (artifactsAmount[counter] != 0) {
-                awailibleArtifacts[user] = counter + 1;
+                awailibleArtifacts[user][counter + 1] += artifactsAmount[counter];
             }
         }
     }
@@ -209,17 +214,19 @@ contract Mining is
         }
 
         for (
-            uint256 counter = 0;
-            counter < _tools.getArtifactAmount();
+            uint256 counter = 1;
+            counter <= _tools.getArtifactsTypesAmount();
             counter++
         ) {
-            if (awailibleArtifacts[_msgSender()] != 0) {
+            if (awailibleArtifacts[_msgSender()][counter] != 0) {
                 artifacts = IArtifacts(_tools.getArtifactsAddress());
-                artifacts.lootArtifact(
-                    _msgSender(),
-                    awailibleArtifacts[_msgSender()]
-                );
-                delete awailibleArtifacts[_msgSender()];
+                for(uint256 i = 1; i <= awailibleArtifacts[_msgSender()][counter]; i++) {
+                    artifacts.lootArtifact(
+                        _msgSender(),
+                        counter
+                    );
+                }
+                delete awailibleArtifacts[_msgSender()][counter];
             }
         }
     }

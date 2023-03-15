@@ -194,12 +194,12 @@
     },
     {
       "inputs": [],
-      "name": "getArtifactAmount",
+      "name": "getArtifactsAddress",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "address",
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -207,12 +207,12 @@
     },
     {
       "inputs": [],
-      "name": "getArtifactsAddress",
+      "name": "getArtifactsTypesAmount",
       "outputs": [
         {
-          "internalType": "address",
+          "internalType": "uint256",
           "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -295,22 +295,12 @@
         },
         {
           "internalType": "uint256",
-          "name": "miningResource",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
           "name": "miningDuration",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
           "name": "energyCost",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "rewardRate",
           "type": "uint256"
         }
       ],

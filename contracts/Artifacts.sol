@@ -53,7 +53,7 @@ contract Artifacts is
         uint256 amount,
         bytes memory data
     ) external virtual onlyOwner whenNotPaused isInBlacklist(to) {
-        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist.");
+        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist");
         _mint(to, artifactType, amount, data);
     }
 
@@ -113,7 +113,7 @@ contract Artifacts is
         override
         returns (string memory)
     {
-        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist.");
+        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist");
         return
             string(
                 abi.encodePacked(

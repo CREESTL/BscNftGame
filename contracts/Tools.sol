@@ -40,6 +40,8 @@ contract Tools is
         mapping(uint256 => uint256) artifacts;
     }
 
+    address private _zeroAddress;
+
     // tools counter
     uint256 private _toolIds;
     // tool types counter
@@ -65,7 +67,7 @@ contract Tools is
 
     event AddTool(uint256 toolType);
     event Craft(address user, uint256);
-    event RecipeCreatedOrUpdated(uint256 toolType, uint256[] resourcesAmount, uint256[] artifactsAmount);
+    event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmount);
     event BaseURI(string baseURI);
     event ToolRepaired(uint256 toolId);
     event ToolPropertiesSet(uint256 toolType);
@@ -126,6 +128,8 @@ contract Tools is
         address goldAddress,
         string memory baseURI
     ) public initializer {
+        _zeroAddress = 0x000000000000000000000000000000000000dEaD;
+
         _blacklist = IBlackList(blacklistAddress);
 
         _resources[1] = IResources(berryAddress);
@@ -148,7 +152,7 @@ contract Tools is
         uint32 miningDuration,
         uint32 energyCost,
         uint32 strengthCost,
-        uint256[] calldata resourcesAmount,
+        uint256 resourcesAmount,
         uint256[] calldata artifactsAmount,
         string calldata newURI
     ) external virtual onlyOwner returns (uint256) {
@@ -283,7 +287,6 @@ contract Tools is
     ) public virtual onlyOwner {
         require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
         require(
-            resourcesAmount.length == _resourceAmount &&
                 artifactsAmount.length == _artifactAmount,
             "Tools: invalid array size"
         );
@@ -291,11 +294,9 @@ contract Tools is
         _recipes[toolType].resourcesAmount = resourcesAmount;
 
         for (uint256 counter = 0; counter < _artifactAmount; counter++) {
-            if (artifactsAmount[counter] > 0) {
-                _recipes[toolType].artifacts[counter] = artifactsAmount[
-                    counter
-                ];
-            }
+            _recipes[toolType].artifacts[counter] = artifactsAmount[
+                 counter
+            ];
         }
 
         emit RecipeCreatedOrUpdated(toolType, resourcesAmount, artifactsAmount);
@@ -307,12 +308,10 @@ contract Tools is
         virtual
         whenNotPaused
         returns (
-            uint256 toolType,
             uint256 resourcesAmount,
             uint256[] memory artifactsAmount
         )
     {
-        resourcesAmount = new uint256[](_resourceAmount);
         artifactsAmount = new uint256[](_artifactAmount);
 
         resourcesAmount = _recipes[toolType].resourcesAmount;
@@ -334,17 +333,17 @@ contract Tools is
         uint256 resourcesAmount;
         uint256[] memory artifactsAmount;
 
-        (, resourcesAmount, artifactsAmount) = getRecipe(toolType);
+        (resourcesAmount, artifactsAmount) = getRecipe(toolType);
 
         _resources[3].transferFrom(
             _msgSender(),
-            address(0),
+            _zeroAddress,
            resourcesAmount
         );
 
         _resources[2].transferFrom(
             _msgSender(),
-            address(0),
+            _zeroAddress,
             resourcesAmount * 5
         );       
 
@@ -352,7 +351,7 @@ contract Tools is
             if (artifactsAmount[counter] != 0) {
                 _artifacts.safeTransferFrom(
                     _msgSender(),
-                    address(0),
+                    _zeroAddress,
                     counter + 1,
                     artifactsAmount[counter],
                     ""
@@ -390,7 +389,7 @@ contract Tools is
 
         _resources[3].transferFrom(
             _msgSender(),
-            address(0),
+            _zeroAddress,
             auraAmount
         );
 
@@ -434,6 +433,32 @@ contract Tools is
         return (
             toolType,
             strength,
+            strengthCost,
+            miningDuration,
+            energyCost
+        );
+    }
+
+    function getToolTypeProperties(uint256 toolType)
+        external
+        view
+        virtual
+        returns (
+            uint256 maxStrength,
+            uint256 strengthCost,
+            uint256 miningDuration,
+            uint256 energyCost
+        )
+    {
+    
+
+        maxStrength = _tools[toolType].maxStrength;
+        strengthCost = _tools[toolType].strengthCost;
+        miningDuration = _tools[toolType].miningDuration;
+        energyCost = _tools[toolType].energyCost;
+
+        return (
+            maxStrength,
             strengthCost,
             miningDuration,
             energyCost
@@ -485,7 +510,7 @@ contract Tools is
         return _resourceAmount;
     }
 
-    function getArtifactAmount() external view returns (uint256) {
+    function getArtifactsTypesAmount() external view returns (uint256) {
         return _artifactAmount;
     }
 
@@ -522,12 +547,13 @@ contract Tools is
     function safeBatchTransferFrom(
         address from,
         address to,
-        uint256[] memory toolTypes,
+        uint256[] memory toolIds,
         uint256[] memory amounts,
         bytes memory data
     ) public virtual override(ERC1155Upgradeable, IERC1155Upgradeable) {
-        for (uint256 count = 0; count < toolTypes.length; count++) {
-            safeTransferFrom(from, to, toolTypes[count], amounts[count], data);
+        for (uint256 count = 0; count < toolIds.length; count++) {
+            require(amounts[count] == 1, "Tools: tokenId is unique");
+            safeTransferFrom(from, to, toolIds[count], 1, data);
         }
     }
 }

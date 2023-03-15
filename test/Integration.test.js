@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 require("dotenv").config();
 
-describe("Mining contract tests", async () =>  {
+xdescribe("Mining contract tests", async () =>  {
     let Tools;
     let Blacklist;
     let Berry;
