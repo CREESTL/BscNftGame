@@ -12,7 +12,6 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IResources.sol";
 import "./interfaces/IArtifacts.sol";
 
-import "hardhat/console.sol";
 
 contract Mining is
     Initializable,
@@ -23,16 +22,13 @@ contract Mining is
     ITools private _tools;
     IBlackList private _blacklist;
 
-    //uint256 private _resourcesAmount;
-    //uint256 private _artifactsAmount;
-
     address private _zeroAddress;
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
     // user address => (resource id => amount)
-    mapping(address => mapping(uint256 => uint256)) awalableResources;
+    mapping(address => mapping(uint256 => uint256)) availableResources;
     // user address => artifacts type => amount
-    mapping(address => mapping(uint256 => uint256)) awailibleArtifacts;
+    mapping(address => mapping(uint256 => uint256)) availableArtifacts;
 
     struct MiningSession {
         uint32 endTime;
@@ -162,16 +158,14 @@ contract Mining is
             "Mining: too early"
         );
 
-    ///@dev check
-        
-        _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
-        MiningSession memory tmp = _session[_msgSender()][toolId];
-        tmp.started = false;
         _tools.corrupt(
-            _msgSender(),
+            address(this),
             toolId,
             _session[_msgSender()][toolId].strengthCost
         );
+        _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
+        MiningSession memory tmp = _session[_msgSender()][toolId];
+        tmp.started = false;
         
         emit MiningEnded(_msgSender(), _session[_msgSender()][toolId]);
         delete _session[_msgSender()][toolId];
@@ -184,13 +178,13 @@ contract Mining is
     ) private {
         for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
             if (resourcesAmount[counter] != 0) {
-                awalableResources[user][counter] += resourcesAmount[counter];
+                availableResources[user][counter] += resourcesAmount[counter];
             }
         }
 
         for (uint256 counter = 0; counter < _tools.getArtifactsTypesAmount(); counter++) {
             if (artifactsAmount[counter] != 0) {
-                awailibleArtifacts[user][counter + 1] += artifactsAmount[counter];
+                availableArtifacts[user][counter + 1] += artifactsAmount[counter];
             }
         }
     }
@@ -203,13 +197,13 @@ contract Mining is
             counter < _tools.getResourceAmount();
             counter++
         ) {
-            if (awalableResources[_msgSender()][counter] != 0) {
+            if (availableResources[_msgSender()][counter] != 0) {
                 resource = IResources(_tools.getResourceAddress(counter + 1));
                 resource.transfer(
                     _msgSender(),
-                    awalableResources[_msgSender()][counter]
+                    availableResources[_msgSender()][counter]
                 );
-                delete awalableResources[_msgSender()][counter];
+                delete availableResources[_msgSender()][counter];
             }
         }
 
@@ -218,15 +212,15 @@ contract Mining is
             counter <= _tools.getArtifactsTypesAmount();
             counter++
         ) {
-            if (awailibleArtifacts[_msgSender()][counter] != 0) {
+            if (availableArtifacts[_msgSender()][counter] != 0) {
                 artifacts = IArtifacts(_tools.getArtifactsAddress());
-                for(uint256 i = 1; i <= awailibleArtifacts[_msgSender()][counter]; i++) {
+                for(uint256 i = 1; i <= availableArtifacts[_msgSender()][counter]; i++) {
                     artifacts.lootArtifact(
                         _msgSender(),
                         counter
                     );
                 }
-                delete awailibleArtifacts[_msgSender()][counter];
+                delete availableArtifacts[_msgSender()][counter];
             }
         }
     }

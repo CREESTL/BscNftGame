@@ -11,7 +11,6 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IArtifacts.sol";
 import "./interfaces/ITools.sol";
 
-import "hardhat/console.sol";
 
 contract Artifacts is
     Initializable,

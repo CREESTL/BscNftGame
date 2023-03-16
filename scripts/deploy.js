@@ -26,10 +26,18 @@ async function main() {
   const artifacts = await upgrades.deployProxy(Artifacts, [process.env.BASE_URI, blacklist.address]);
   const mining = await upgrades.deployProxy(Mining, [blacklist.address, tools.address]);
 
-  console.log("tools address: ", tools.address);
-  console.log("artifacts address: ", artifacts.address);
-  console.log("mining address: ", mining.address);
-  console.log("blacklist address: ", blacklist.address);
+  await artifacts.setToolsAddress(tools.address);
+  await tools.setArtifactsAddress(artifacts.address);
+  await tools.setMiningAddress(mining.address);
+
+  console.log("Tools address: ", tools.address);
+  console.log("Artifacts address: ", artifacts.address);
+  console.log("Mining address: ", mining.address);
+  console.log("Blacklist address: ", blacklist.address);
+  console.log("Berry address: ", berry.address);
+  console.log("Tree address: ", tree.address);
+  console.log("Gold address: ", gold.address);
+  console.log("Gem address: ", gem.address);
   // // add raspberry bush
   // await tools.addTool(1, 100, 30, 1, 5, 10);
   // // add magic berry
