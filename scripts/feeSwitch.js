@@ -9,9 +9,9 @@ const {upgrades, ethers} = require("hardhat");
 async function main() {
  
  
-  const berry = await ethers.getContractAt("PocMon", "0xFe873Bb771Fd8398845Ffdac03a5A1FA068b3180");
-  const tree = await ethers.getContractAt("PocMon", "0xe194f7F264819b92E0BA926305A465db180cCF95");
-  const gold = await ethers.getContractAt("PocMon", "0x097CB7475A62E6BA115d2A3AE2e13aACFEC7e450");
+  const berry = await ethers.getContractAt("PocMon", "0xf01cdeff5dE5a2ff3399147588165792f4A51Ffe");
+  const tree = await ethers.getContractAt("PocMon", "0x933edB289A7Cf1CfBfB06010E3B7b8Ed9ADEeF31");
+  const gold = await ethers.getContractAt("PocMon", "0xEd25Ee3bbE7832fd15456A06570C0b9bf610BF71");
 
 await berry.setReflectionFeePercent(0)
 await berry.setGemFeePercent(0)

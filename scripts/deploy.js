@@ -23,7 +23,7 @@ async function main() {
   const blacklist = await Blacklist.deploy();
 
   const tools = await upgrades.deployProxy(Tools, [blacklist.address, berry.address, tree.address, gold.address, process.env.BASE_URI]);
-  const artifacts = await upgrades.deployProxy(Artifacts, [process.env.BASE_URI, blacklist.address]);
+  const artifacts = await upgrades.deployProxy(Artifacts, [tools.address, process.env.BASE_URI, blacklist.address]);
   const mining = await upgrades.deployProxy(Mining, [blacklist.address, tools.address]);
 
   await artifacts.setToolsAddress(tools.address);
