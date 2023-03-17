@@ -12,7 +12,6 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IResources.sol";
 import "./interfaces/IArtifacts.sol";
 
-
 contract Mining is
     Initializable,
     PausableUpgradeable,
@@ -126,7 +125,7 @@ contract Mining is
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
         IResources resource = IResources(
-            _tools.getResourceAddress(1)
+            _tools.getResourceAddress(0)
         );
 
         _tools.safeTransferFrom(user, address(this), toolId, 1, "");
@@ -198,7 +197,7 @@ contract Mining is
             counter++
         ) {
             if (availableResources[_msgSender()][counter] != 0) {
-                resource = IResources(_tools.getResourceAddress(counter + 1));
+                resource = IResources(_tools.getResourceAddress(counter));
                 resource.transfer(
                     _msgSender(),
                     availableResources[_msgSender()][counter]

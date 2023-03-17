@@ -37,10 +37,10 @@ describe("Mining contract tests", async () =>  {
         blacklist = await Blacklist.deploy();
 
         tools = await upgrades.deployProxy(Tools, [blacklist.address, berry.address, tree.address, gold.address, BASE_URI]);
-        artifacts = await upgrades.deployProxy(Artifacts, [BASE_URI, blacklist.address]);
+        artifacts = await upgrades.deployProxy(Artifacts, [tools.address, BASE_URI, blacklist.address]);
         mining = await upgrades.deployProxy(Mining, [blacklist.address, tools.address]);
         
-        await artifacts.setToolsAddress(tools.address);
+        //await artifacts.setToolsAddress(tools.address);
         await tools.setArtifactsAddress(artifacts.address);
         await tools.setURI(1, "1.json");
         await tools.setMiningAddress(mining.address);

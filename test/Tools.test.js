@@ -35,10 +35,10 @@ describe("Tools tests", async () => {
         blacklist = await Blacklist.deploy();
 
         tools = await upgrades.deployProxy(Tools, [blacklist.address, berry.address, tree.address, gold.address, BASE_URI]);
-        artifacts = await upgrades.deployProxy(Artifacts, [BASE_URI, blacklist.address]);
+        artifacts = await upgrades.deployProxy(Artifacts, [tools.address, BASE_URI, blacklist.address]);
         mining = await upgrades.deployProxy(Mining, [blacklist.address, tools.address]);
         
-        await artifacts.setToolsAddress(tools.address);
+        //await artifacts.setToolsAddress(tools.address);
         await tools.setArtifactsAddress(artifacts.address);
         await tools.setURI(1, "1.json");
         //await tools.setRepairCost([0, 0, 5]);
@@ -51,10 +51,6 @@ describe("Tools tests", async () => {
         it("add tool with wrong strengh", async () => {
             await expect(tools.addTool(101, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json")).to.be.revertedWith("Tools: invalid strength value");
         });
-/* 
-        it("add tool with invalid resource index", async () => {
-            await expect(tools.addTool(10, 100, 30, 1, 5, 10)).to.be.revertedWith("Tools: invalid mining resource value");
-        }); */
 
         it("add tools with zero mining duration", async () => {
             await expect(tools.addTool(100, 0, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json")).to.be.revertedWith("Tools: mining duration must be greather than zero")
@@ -70,7 +66,7 @@ describe("Tools tests", async () => {
 
         it("mint with tool id > _toolIds", async () => {
             await tools.addTool(100, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json");
-            await expect(tools.mint(acc1.address, 10, 10)).to.be.revertedWith("Tools: invalid id value");
+            await expect(tools.mint(acc1.address, 10, 10)).to.be.revertedWith("Tools: invalid toolTypes value");
         });
 
         it("mint to blacklist", async () => {
@@ -94,7 +90,7 @@ describe("Tools tests", async () => {
 
         it("mintBatch with tool ids > _toolIds", async () => {
             await tools.addTool(100, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json");
-            await expect(tools.mintBatch(acc1.address, [10, 20, 30], [1, 1, 1], ethers.utils.randomBytes(10))).to.be.revertedWith("Tools: invalid id value");
+            await expect(tools.mintBatch(acc1.address, [10, 20, 30], [1, 1, 1], ethers.utils.randomBytes(10))).to.be.revertedWith("Tools: invalid toolTypes value");
         });
 
         it("mintBatch to blacklist", async () => {
@@ -193,13 +189,6 @@ describe("Tools tests", async () => {
             expect(result.toString()).to.be.equal([150, 2, 15, 10].toString())
         });
 
-        it("increase resource amount", async () => {
-            expect(await tools.getResourceAmount()).to.be.equal(3)
-            apple = await Berry.deploy();
-            await tools.increaseResourceAmount(apple.address)
-            expect(await tools.getResourceAmount()).to.be.equal(4)
-        });
-
         it("revert safeBatchTransferFrom with Tools: tokenId is unique", async () => {
             await tools.addTool(100, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json");
             await tools.addTool(100, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json");
@@ -251,11 +240,6 @@ describe("Tools tests", async () => {
 
         it("supportsInterface", async () => {
             expect(await tools.supportsInterface("0xd9b67a26")).to.be.equal(true)
-        });
-
-        it("revert increase resource amount with Tools: invalid address", async () => {
-            apple = await Berry.deploy();
-            await expect(tools.increaseResourceAmount("0x0000000000000000000000000000000000000000")).to.be.revertedWith("Tools: invalid address")
         });
 
         it("revert corrupt with Tools: msg.sender isn't Mining contract", async () => {
@@ -313,9 +297,9 @@ describe("Tools tests", async () => {
             await expect(tools.repairTool(1)).to.be.revertedWith("Tools: tool does not exist");
         });
 
-        it("revert set tool properties with Tools: invalid id value", async () => {
+        it("revert set tool properties with Tools: invalid toolTypes value", async () => {
             await tools.addTool(100, 30, 1, 5, 1, [1, 0, 0, 0, 0, 0], "1.json");
-            await expect(tools.setToolProperties(7, 150, 15, 10, 2)).to.be.revertedWith("Tools: invalid id value");
+            await expect(tools.setToolProperties(7, 150, 15, 10, 2)).to.be.revertedWith("Tools: invalid toolTypes value");
         });
 
         it("revert set tool properties with Tools: invalid strength value", async () => {

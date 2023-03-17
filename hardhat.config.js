@@ -30,8 +30,8 @@ module.exports = {
     testnet: {
       url: "https://data-seed-prebsc-2-s1.binance.org:8545",
       accounts: [ACC_PRIVATE_KEY],
-      gas: 21000000,
-      gasPrice: 8000000000,
+/*       gas: 21000000,
+      gasPrice: 8000000000, */
   },
   },
 

@@ -28,12 +28,18 @@ contract Tools is
     IBlackList private _blacklist;
     IArtifacts private _artifacts;
 
+    enum Resources {
+        Berry,
+        Tree,
+        Gold
+    }
+
     string private _baseURI;
 
     address private _miningAddress;
 
     struct Recipe {
-        // resource id => amount
+        // resource amount
         uint256 resourcesAmount;
         // artifacts id => amonut
         mapping(uint256 => uint256) artifacts;
@@ -50,8 +56,8 @@ contract Tools is
     // resources counter
     uint256 private _resourceAmount;
 
-    // resource id => IResources
-    mapping(uint256 => IResources) private _resources;
+    // enum Resources => IResources
+    mapping(Resources => IResources) private _resources;
     // tool type => repair cost
     mapping(uint256 => uint256) private _repairCost;
     // tool id => uri
@@ -131,9 +137,9 @@ contract Tools is
 
         _blacklist = IBlackList(blacklistAddress);
 
-        _resources[1] = IResources(berryAddress);
-        _resources[2] = IResources(treeAddress);
-        _resources[3] = IResources(goldAddress);
+        _resources[Resources.Berry] = IResources(berryAddress);
+        _resources[Resources.Tree] = IResources(treeAddress);
+        _resources[Resources.Gold] = IResources(goldAddress);
 
         _artifactAmount = 6;
         _resourceAmount = 3;
@@ -181,7 +187,7 @@ contract Tools is
         uint32 energyCost,
         uint32 strengthCost
     ) external virtual onlyOwner {
-        require(toolType <= _toolTypes, "Tools: invalid id value");
+        require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
         require(maxStrength % 5 == 0, "Tools: invalid strength value");
         require(
             miningDuration > 0,
@@ -202,7 +208,7 @@ contract Tools is
         uint256 amount
     ) public virtual onlyOwner isInBlacklist(to) {
         require(_toolTypes != 0, "Tools: no tools");
-        require(toolType <= _toolTypes, "Tools: invalid id value");
+        require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
 
         _mint(to, toolType, amount, "");
         for (uint256 counter = 0; counter < amount; counter++) {
@@ -224,7 +230,7 @@ contract Tools is
         for (uint256 counter = 0; counter < toolTypes.length; counter++) {
             require(
                 toolTypes[counter] <= _toolTypes,
-                "Tools: invalid id value"
+                "Tools: invalid toolTypes value"
             );
         }
 
@@ -334,13 +340,13 @@ contract Tools is
 
         (resourcesAmount, artifactsAmount) = getRecipe(toolType);
 
-        _resources[3].transferFrom(
+        _resources[Resources.Gold].transferFrom(
             _msgSender(),
             _zeroAddress,
            resourcesAmount
         );
 
-        _resources[2].transferFrom(
+        _resources[Resources.Tree].transferFrom(
             _msgSender(),
             _zeroAddress,
             resourcesAmount * 5
@@ -376,17 +382,19 @@ contract Tools is
         whenNotPaused
         isInBlacklist(_msgSender())
     {
-        uint256 toolTypeId = _ownedTools[_msgSender()][toolId].toolType;
+        OwnedTool memory tool = _ownedTools[_msgSender()][toolId];
+        uint256 toolTypeId = tool.toolType;
         require(
             toolTypeId > 0,
             "Tools: tool does not exist"
         );
-        uint128 maxStrength = _tools[_ownedTools[_msgSender()][toolId].toolType].maxStrength;
-        uint256 auraAmount = (maxStrength - _ownedTools[_msgSender()][toolId].strength) / 5;
+        
+        uint128 maxStrength = _tools[tool.toolType].maxStrength;
+        uint256 auraAmount = (maxStrength - tool.strength) / 5;
 
         require(auraAmount != 0, "Tools: the tool is already strong enough");
 
-        _resources[3].transferFrom(
+        _resources[Resources.Gold].transferFrom(
             _msgSender(),
             _zeroAddress,
             auraAmount
@@ -401,12 +409,6 @@ contract Tools is
     function increaseArtifactAmount() external {
         require(msg.sender == address(_artifacts), "Tools: caller is not an Artifacts contract");
         _artifactAmount++;
-    }
-
-    function increaseResourceAmount(address newResource) external onlyOwner {
-        require(newResource != address(0), "Tools: invalid address");
-        _resourceAmount++;
-        _resources[_resourceAmount] = IResources(newResource);
     }
 
     function getToolProperties(address user, uint256 toolId)
@@ -482,7 +484,7 @@ contract Tools is
         virtual
         returns (address)
     {
-        return address(_resources[resourceId]);
+        return address(_resources[Resources(resourceId)]);
     }
 
     function getArtifactsAddress() external view returns (address) {

@@ -33,9 +33,11 @@ contract Artifacts is
     }
 
     function initialize(
+        address _toolsContractAddress,
         string memory _baseUrl,
         address _blackListContractAddress
     ) public initializer {
+        _tools = ITools(_toolsContractAddress);
         _baseURI = _baseUrl;
         _blacklist = IBlackList(_blackListContractAddress);
 
@@ -61,7 +63,7 @@ contract Artifacts is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) external virtual {
+    ) external virtual onlyOwner whenNotPaused isInBlacklist(to) {
         for (uint256 counter = 0; counter < ids.length; counter++) {
             require(
                 ids[counter] <= _artifactTypes,
