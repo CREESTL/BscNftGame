@@ -40,11 +40,9 @@ contract Mining is
     event MiningStarted(address user, MiningSession session);
     event MiningEnded(address user, MiningSession session);
 
-    function supportsInterface(bytes4 interfaceId)
-        external
-        pure
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
         return interfaceId == type(IERC165).interfaceId;
     }
 
@@ -78,10 +76,10 @@ contract Mining is
             );
     }
 
-    function initialize(address blacklistAddress, address toolsAddress)
-        public
-        initializer
-    {
+    function initialize(
+        address blacklistAddress,
+        address toolsAddress
+    ) public initializer {
         _zeroAddress = 0x000000000000000000000000000000000000dEaD;
         _tools = ITools(toolsAddress);
         _blacklist = IBlackList(blacklistAddress);
@@ -99,17 +97,11 @@ contract Mining is
     }
 
     function startMining(
-        uint256 toolId, 
+        uint256 toolId,
         address user,
         uint256[] memory resourcesAmount,
         uint256[] memory artifactsAmount
-    )
-        external
-        virtual
-        onlyOwner
-        whenNotPaused
-        isInBlacklist(user)
-    {
+    ) external virtual onlyOwner whenNotPaused isInBlacklist(user) {
         require(
             !_session[user][toolId].started,
             "Mining: this user already started mining process"
@@ -124,9 +116,7 @@ contract Mining is
 
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
-        IResources resource = IResources(
-            _tools.getResourceAddress(0)
-        );
+        IResources resource = IResources(_tools.getResourceAddress(0));
 
         _tools.safeTransferFrom(user, address(this), toolId, 1, "");
         resource.transferFrom(user, _zeroAddress, energyCost);
@@ -142,12 +132,9 @@ contract Mining is
         emit MiningStarted(user, _session[user][toolId]);
     }
 
-    function endMining(uint256 toolId)
-        external
-        virtual
-        whenNotPaused
-        isInBlacklist(_msgSender())
-    {
+    function endMining(
+        uint256 toolId
+    ) external virtual whenNotPaused isInBlacklist(_msgSender()) {
         require(
             _session[_msgSender()][toolId].started,
             "Mining: user doesn't mine"
@@ -165,7 +152,7 @@ contract Mining is
         _tools.safeTransferFrom(address(this), _msgSender(), toolId, 1, "");
         MiningSession memory tmp = _session[_msgSender()][toolId];
         tmp.started = false;
-        
+
         emit MiningEnded(_msgSender(), _session[_msgSender()][toolId]);
         delete _session[_msgSender()][toolId];
     }
@@ -181,9 +168,15 @@ contract Mining is
             }
         }
 
-        for (uint256 counter = 0; counter < _tools.getArtifactsTypesAmount(); counter++) {
+        for (
+            uint256 counter = 0;
+            counter < _tools.getArtifactsTypesAmount();
+            counter++
+        ) {
             if (artifactsAmount[counter] != 0) {
-                availableArtifacts[user][counter + 1] += artifactsAmount[counter];
+                availableArtifacts[user][counter + 1] += artifactsAmount[
+                    counter
+                ];
             }
         }
     }
@@ -213,11 +206,12 @@ contract Mining is
         ) {
             if (availableArtifacts[_msgSender()][counter] != 0) {
                 artifacts = IArtifacts(_tools.getArtifactsAddress());
-                for(uint256 i = 1; i <= availableArtifacts[_msgSender()][counter]; i++) {
-                    artifacts.lootArtifact(
-                        _msgSender(),
-                        counter
-                    );
+                for (
+                    uint256 i = 1;
+                    i <= availableArtifacts[_msgSender()][counter];
+                    i++
+                ) {
+                    artifacts.lootArtifact(_msgSender(), counter);
                 }
                 delete availableArtifacts[_msgSender()][counter];
             }

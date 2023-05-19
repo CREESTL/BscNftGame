@@ -17,7 +17,10 @@ interface ITools is IERC1155Upgradeable {
         uint128 strength;
     }
 
-    function getToolProperties(address user, uint256 toolId)
+    function getToolProperties(
+        address user,
+        uint256 toolId
+    )
         external
         view
         returns (
@@ -28,10 +31,9 @@ interface ITools is IERC1155Upgradeable {
             uint256 energyCost
         );
 
-    function getResourceAddress(uint256 resourceId)
-        external
-        view
-        returns (address);
+    function getResourceAddress(
+        uint256 resourceId
+    ) external view returns (address);
 
     function getArtifactsAddress() external view returns (address);
 
