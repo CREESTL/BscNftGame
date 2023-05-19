@@ -33,7 +33,7 @@ contract Gem is Ownable, ERC20 {
 
     function compensateBnb(address to, uint256 bnbAmount) external {
         if (msg.sender == compensator) {
-            _mint(to, (bnbAmount * compensationRate) / 10**9);
+            _mint(to, (bnbAmount * compensationRate) / 10 ** 9);
         }
     }
 

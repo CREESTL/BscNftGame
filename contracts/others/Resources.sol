@@ -65,10 +65,10 @@ contract PocMon is Ownable, IERC20 {
         _name = "PocMon";
         _symbol = "MON";
         _decimals = 9;
-        _tTotal = 300_000_000 * 10**9;
+        _tTotal = 300_000_000 * 10 ** 9;
         _rTotal = (MAX - (MAX % _tTotal));
-        _maxTxAmount = 10 * 10**6 * 10**9;
-        numTokensSellToAddToLiquidity = 1_500_000 * 10**9;
+        _maxTxAmount = 10 * 10 ** 6 * 10 ** 9;
+        numTokensSellToAddToLiquidity = 1_500_000 * 10 ** 9;
         _gemWalletAddress = devAddress;
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(router);
@@ -113,29 +113,25 @@ contract PocMon is Ownable, IERC20 {
         return tokenFromReflection(_rOwned[account]);
     }
 
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
 
-    function allowance(address owner, address spender)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function allowance(
+        address owner,
+        address spender
+    ) public view override returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 amount
+    ) public override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -157,11 +153,10 @@ contract PocMon is Ownable, IERC20 {
         return true;
     }
 
-    function increaseAllowance(address spender, uint256 addedValue)
-        public
-        virtual
-        returns (bool)
-    {
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) public virtual returns (bool) {
         _approve(
             _msgSender(),
             spender,
@@ -170,11 +165,10 @@ contract PocMon is Ownable, IERC20 {
         return true;
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        public
-        virtual
-        returns (bool)
-    {
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) public virtual returns (bool) {
         _approve(
             _msgSender(),
             spender,
@@ -190,11 +184,10 @@ contract PocMon is Ownable, IERC20 {
         return _isExcluded[account];
     }
 
-    function reflectionFromToken(uint256 tAmount, bool deductTransferFee)
-        public
-        view
-        returns (uint256)
-    {
+    function reflectionFromToken(
+        uint256 tAmount,
+        bool deductTransferFee
+    ) public view returns (uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
             (uint256 rAmount, , , , , ) = _getValues(tAmount);
@@ -205,11 +198,9 @@ contract PocMon is Ownable, IERC20 {
         }
     }
 
-    function tokenFromReflection(uint256 rAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function tokenFromReflection(
+        uint256 rAmount
+    ) public view returns (uint256) {
         require(
             rAmount <= _rTotal,
             "Amount must be less than total reflections"
@@ -249,10 +240,9 @@ contract PocMon is Ownable, IERC20 {
     }
 
     // !
-    function setReflectionFeePercent(uint256 reflectionFee_)
-        external
-        onlyOwner
-    {
+    function setReflectionFeePercent(
+        uint256 reflectionFee_
+    ) external onlyOwner {
         require(
             reflectionFee_ + _liquidityFee + _gemFee < 15,
             "You have reached fee limit"
@@ -281,7 +271,7 @@ contract PocMon is Ownable, IERC20 {
     // !
     function setMaxTxAmount(uint256 maxTxAmount) public onlyOwner {
         require(
-            maxTxAmount >= 1_500_000 * 10**9,
+            maxTxAmount >= 1_500_000 * 10 ** 9,
             "maxTxAmount should be greater than 1500000e9"
         );
         _maxTxAmount = maxTxAmount;
@@ -312,17 +302,12 @@ contract PocMon is Ownable, IERC20 {
         _tFeeTotal = _tFeeTotal.add(tFee);
     }
 
-    function _getValues(uint256 tAmount)
+    function _getValues(
+        uint256 tAmount
+    )
         private
         view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256, uint256, uint256, uint256, uint256)
     {
         (
             uint256 tTransferAmount,
@@ -351,16 +336,9 @@ contract PocMon is Ownable, IERC20 {
         );
     }
 
-    function _getTValues(uint256 tAmount)
-        private
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    function _getTValues(
+        uint256 tAmount
+    ) private view returns (uint256, uint256, uint256, uint256) {
         uint256 tReflectionFee = calculateReflectionFee(tAmount);
         uint256 tGemFee = calculateGemFee(tAmount);
         uint256 tLiquidity = calculateLiquidityFee(tAmount);
@@ -376,15 +354,7 @@ contract PocMon is Ownable, IERC20 {
         uint256 tGemFee,
         uint256 tLiquidity,
         uint256 currentRate
-    )
-        private
-        pure
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    ) private pure returns (uint256, uint256, uint256) {
         uint256 rAmount = tAmount.mul(currentRate);
         uint256 rReflectionFee = tReflectionFee.mul(currentRate);
         uint256 rGemFee = tGemFee.mul(currentRate);
@@ -423,24 +393,20 @@ contract PocMon is Ownable, IERC20 {
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
 
-    function calculateReflectionFee(uint256 _amount)
-        private
-        view
-        returns (uint256)
-    {
-        return _amount.mul(_reflectionFee).div(10**2);
+    function calculateReflectionFee(
+        uint256 _amount
+    ) private view returns (uint256) {
+        return _amount.mul(_reflectionFee).div(10 ** 2);
     }
 
     function calculateGemFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_gemFee).div(10**2);
+        return _amount.mul(_gemFee).div(10 ** 2);
     }
 
-    function calculateLiquidityFee(uint256 _amount)
-        private
-        view
-        returns (uint256)
-    {
-        return _amount.mul(_liquidityFee).div(10**2);
+    function calculateLiquidityFee(
+        uint256 _amount
+    ) private view returns (uint256) {
+        return _amount.mul(_liquidityFee).div(10 ** 2);
     }
 
     function removeAllFee() private {
@@ -466,10 +432,9 @@ contract PocMon is Ownable, IERC20 {
         uniswapV2Router = _uniswapV2Router;
     }
 
-    function setNumTokensSellToAddToLiquidity(uint256 amountToUpdate)
-        external
-        onlyOwner
-    {
+    function setNumTokensSellToAddToLiquidity(
+        uint256 amountToUpdate
+    ) external onlyOwner {
         numTokensSellToAddToLiquidity = amountToUpdate;
     }
 
@@ -485,11 +450,7 @@ contract PocMon is Ownable, IERC20 {
         return _isExcludedFromFee[account];
     }
 
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) private {
+    function _approve(address owner, address spender, uint256 amount) private {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -497,11 +458,7 @@ contract PocMon is Ownable, IERC20 {
         emit Approval(owner, spender, amount);
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) private {
+    function _transfer(address from, address to, uint256 amount) private {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");

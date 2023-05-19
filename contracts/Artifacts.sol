@@ -11,7 +11,6 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IArtifacts.sol";
 import "./interfaces/ITools.sol";
 
-
 contract Artifacts is
     Initializable,
     OwnableUpgradeable,
@@ -25,7 +24,11 @@ contract Artifacts is
     string private _baseURI;
     uint256 private _artifactTypes;
 
+    mapping(uint256 => string) _typesToUris;
+
     event AddNewArtifact(uint256);
+    event BaseUriChanged(string);
+    event UriChanged(uint256, string);
 
     modifier isInBlacklist(address user) {
         require(!_blacklist.check(user), "Artifacts: user in blacklist");
@@ -41,8 +44,6 @@ contract Artifacts is
         _baseURI = _baseUrl;
         _blacklist = IBlackList(_blackListContractAddress);
 
-        _artifactTypes = 6;
-
         __ERC1155_init("");
         __Ownable_init();
         __Pausable_init();
@@ -53,8 +54,11 @@ contract Artifacts is
         address to,
         uint256 amount,
         bytes memory data
-    ) external virtual onlyOwner whenNotPaused isInBlacklist(to) {
-        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist");
+    ) external onlyOwner whenNotPaused isInBlacklist(to) {
+        require(
+            artifactType <= _artifactTypes,
+            "Artifacts: This artifact doesn't exist"
+        );
         _mint(to, artifactType, amount, data);
     }
 
@@ -63,7 +67,7 @@ contract Artifacts is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) external virtual onlyOwner whenNotPaused isInBlacklist(to) {
+    ) external onlyOwner whenNotPaused isInBlacklist(to) {
         for (uint256 counter = 0; counter < ids.length; counter++) {
             require(
                 ids[counter] <= _artifactTypes,
@@ -92,14 +96,8 @@ contract Artifacts is
         }
     }
 
-    function addNewArtifact()
-        external
-        virtual
-        onlyOwner
-    {
-        _artifactTypes += 1;
-        _tools.increaseArtifactAmount();
-        emit AddNewArtifact(_artifactTypes);
+    function addNewArtifact() public onlyOwner {
+        _addNewArtifact();
     }
 
     function setToolsAddress(address toolsAddress) external onlyOwner {
@@ -107,25 +105,60 @@ contract Artifacts is
         _tools = ITools(toolsAddress);
     }
 
-    function uri(uint256 artifactType)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        require(artifactType <= _artifactTypes, "Artifacts: This artifact doesn't exist");
-        return
-            string(
-                abi.encodePacked(
-                    _baseURI,
-                    Strings.toString(artifactType),
-                    ".json"
-                )
-            );
+    function getBaseUri() external view returns (string memory) {
+        return _baseURI;
+    }
+
+    function setBaseUri(string calldata newBaseUri) external onlyOwner {
+        _setBaseUri(newBaseUri);
+    }
+
+    function setUri(
+        uint256 artifactType,
+        string calldata newUri
+    ) external onlyOwner {
+        _setUri(artifactType, newUri);
+    }
+
+    function uri(
+        uint256 artifactType
+    ) public view override returns (string memory) {
+        require(
+            artifactType <= _artifactTypes,
+            "Artifacts: This artifact doesn't exist"
+        );
+        return _typesToUris[artifactType];
     }
 
     function getArtifactsTypesAmount() external view returns (uint256) {
         return _artifactTypes;
+    }
+
+    function _addNewArtifact() private {
+        _artifactTypes += 1;
+        _tools.increaseArtifactAmount();
+        // New artifact gets URI formed from base URI and artifact's type
+        _typesToUris[_artifactTypes] = string(
+            abi.encodePacked(
+                _baseURI,
+                Strings.toString(_artifactTypes),
+                ".json"
+            )
+        );
+        emit AddNewArtifact(_artifactTypes);
+    }
+
+    function _setBaseUri(string calldata newBaseUri) private {
+        _baseURI = newBaseUri;
+        emit BaseUriChanged(newBaseUri);
+    }
+
+    function _setUri(uint256 artifactType, string calldata newUri) private {
+        require(
+            artifactType <= _artifactTypes,
+            "Artifacts: This artifact doesn't exist"
+        );
+        _typesToUris[artifactType] = newUri;
+        emit UriChanged(artifactType, newUri);
     }
 }

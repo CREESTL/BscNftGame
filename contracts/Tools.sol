@@ -14,7 +14,6 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IArtifacts.sol";
 import "./interfaces/ITools.sol";
 
-
 contract Tools is
     Initializable,
     OwnableUpgradeable,
@@ -72,7 +71,11 @@ contract Tools is
 
     event AddTool(uint256 toolType);
     event Craft(address user, uint256);
-    event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmount);
+    event RecipeCreatedOrUpdated(
+        uint256 toolType,
+        uint256 resourcesAmount,
+        uint256[] artifactsAmount
+    );
     event BaseURI(string baseURI);
     event ToolRepaired(uint256 toolId);
     event ToolPropertiesSet(uint256 toolType);
@@ -112,7 +115,9 @@ contract Tools is
             );
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
@@ -141,7 +146,6 @@ contract Tools is
         _resources[Resources.Tree] = IResources(treeAddress);
         _resources[Resources.Gold] = IResources(goldAddress);
 
-        _artifactAmount = 6;
         _resourceAmount = 3;
         _baseURI = baseURI;
 
@@ -257,12 +261,9 @@ contract Tools is
         _setBaseURI(baseURI);
     }
 
-    function uri(uint256 toolType)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function uri(
+        uint256 toolType
+    ) public view override returns (string memory) {
         string memory tokenURI = _tokenURIs[toolType];
         return
             bytes(tokenURI).length > 0
@@ -270,10 +271,10 @@ contract Tools is
                 : super.uri(toolType);
     }
 
-    function _setURI(uint256 toolType, string calldata tokenURI)
-        internal
-        virtual
-    {
+    function _setURI(
+        uint256 toolType,
+        string calldata tokenURI
+    ) internal virtual {
         _tokenURIs[toolType] = tokenURI;
         emit URI(uri(toolType), toolType);
     }
@@ -292,30 +293,27 @@ contract Tools is
     ) public virtual onlyOwner {
         require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
         require(
-                artifactsAmount.length == _artifactAmount,
+            artifactsAmount.length == _artifactAmount,
             "Tools: invalid array size"
         );
 
         _recipes[toolType].resourcesAmount = resourcesAmount;
 
         for (uint256 counter = 0; counter < _artifactAmount; counter++) {
-            _recipes[toolType].artifacts[counter] = artifactsAmount[
-                 counter
-            ];
+            _recipes[toolType].artifacts[counter] = artifactsAmount[counter];
         }
 
         emit RecipeCreatedOrUpdated(toolType, resourcesAmount, artifactsAmount);
     }
 
-    function getRecipe(uint256 toolType)
+    function getRecipe(
+        uint256 toolType
+    )
         public
         view
         virtual
         whenNotPaused
-        returns (
-            uint256 resourcesAmount,
-            uint256[] memory artifactsAmount
-        )
+        returns (uint256 resourcesAmount, uint256[] memory artifactsAmount)
     {
         artifactsAmount = new uint256[](_artifactAmount);
 
@@ -330,11 +328,9 @@ contract Tools is
         }
     }
 
-    function craft(uint256 toolType)
-        external
-        whenNotPaused
-        isInBlacklist(_msgSender())
-    {
+    function craft(
+        uint256 toolType
+    ) external whenNotPaused isInBlacklist(_msgSender()) {
         uint256 resourcesAmount;
         uint256[] memory artifactsAmount;
 
@@ -343,14 +339,14 @@ contract Tools is
         _resources[Resources.Gold].transferFrom(
             _msgSender(),
             _zeroAddress,
-           resourcesAmount
+            resourcesAmount
         );
 
         _resources[Resources.Tree].transferFrom(
             _msgSender(),
             _zeroAddress,
             resourcesAmount * 5
-        );       
+        );
 
         for (uint256 counter = 0; counter < artifactsAmount.length; counter++) {
             if (artifactsAmount[counter] != 0) {
@@ -376,19 +372,13 @@ contract Tools is
     }
 
     // ----------- Repair Functions -----------
-    function repairTool(uint256 toolId)
-        public
-        virtual
-        whenNotPaused
-        isInBlacklist(_msgSender())
-    {
+    function repairTool(
+        uint256 toolId
+    ) public virtual whenNotPaused isInBlacklist(_msgSender()) {
         OwnedTool memory tool = _ownedTools[_msgSender()][toolId];
         uint256 toolTypeId = tool.toolType;
-        require(
-            toolTypeId > 0,
-            "Tools: tool does not exist"
-        );
-        
+        require(toolTypeId > 0, "Tools: tool does not exist");
+
         uint128 maxStrength = _tools[tool.toolType].maxStrength;
         uint256 auraAmount = (maxStrength - tool.strength) / 5;
 
@@ -407,11 +397,17 @@ contract Tools is
     // ----------- Utils Functions -----------
 
     function increaseArtifactAmount() external {
-        require(msg.sender == address(_artifacts), "Tools: caller is not an Artifacts contract");
+        require(
+            msg.sender == address(_artifacts),
+            "Tools: caller is not an Artifacts contract"
+        );
         _artifactAmount++;
     }
 
-    function getToolProperties(address user, uint256 toolId)
+    function getToolProperties(
+        address user,
+        uint256 toolId
+    )
         external
         view
         virtual
@@ -431,16 +427,12 @@ contract Tools is
         miningDuration = _tools[toolType].miningDuration;
         energyCost = _tools[toolType].energyCost;
 
-        return (
-            toolType,
-            strength,
-            strengthCost,
-            miningDuration,
-            energyCost
-        );
+        return (toolType, strength, strengthCost, miningDuration, energyCost);
     }
 
-    function getToolTypeProperties(uint256 toolType)
+    function getToolTypeProperties(
+        uint256 toolType
+    )
         external
         view
         virtual
@@ -451,19 +443,12 @@ contract Tools is
             uint256 energyCost
         )
     {
-    
-
         maxStrength = _tools[toolType].maxStrength;
         strengthCost = _tools[toolType].strengthCost;
         miningDuration = _tools[toolType].miningDuration;
         energyCost = _tools[toolType].energyCost;
 
-        return (
-            maxStrength,
-            strengthCost,
-            miningDuration,
-            energyCost
-        );
+        return (maxStrength, strengthCost, miningDuration, energyCost);
     }
 
     function corrupt(
@@ -478,12 +463,9 @@ contract Tools is
         _ownedTools[user][toolId].strength -= uint128(strengthCost);
     }
 
-    function getResourceAddress(uint256 resourceId)
-        external
-        view
-        virtual
-        returns (address)
-    {
+    function getResourceAddress(
+        uint256 resourceId
+    ) external view virtual returns (address) {
         return address(_resources[Resources(resourceId)]);
     }
 

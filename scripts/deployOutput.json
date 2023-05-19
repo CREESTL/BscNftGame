@@ -1,0 +1,76 @@
+{
+  "bsc_testnet": {
+    "Gem": {
+      "address": "0x40b95777DD7F8Bb6A152eA7fba9Afe601b14b2bD",
+      "verification": "https://testnet.bscscan.com/address/0x40b95777DD7F8Bb6A152eA7fba9Afe601b14b2bD#code"
+    },
+    "Berry": {
+      "address": "0x0e6E9842Fe9F469CE667e70aBA9Fc5740Daa4682",
+      "verification": "https://testnet.bscscan.com/address/0x0e6E9842Fe9F469CE667e70aBA9Fc5740Daa4682#code"
+    },
+    "Tree": {
+      "address": "0x36d93cc304d76e7C7e90651Ed55F65a9A8A57E81",
+      "verification": "https://testnet.bscscan.com/address/0x36d93cc304d76e7C7e90651Ed55F65a9A8A57E81#code"
+    },
+    "Gold": {
+      "address": "0x4Eca2522156b641ad149cb1875775B0AB7703850",
+      "verification": "https://testnet.bscscan.com/address/0x4Eca2522156b641ad149cb1875775B0AB7703850#code"
+    },
+    "BlackList": {
+      "address": "0xDF767Eed45C3D54d201f177226d99436C19847FC",
+      "verification": "https://testnet.bscscan.com/address/0xDF767Eed45C3D54d201f177226d99436C19847FC#code"
+    },
+    "Tools": {
+      "proxyAddress": "0x8213cea0722c5b39d603CfD31d0c5Fc7abB64F7E",
+      "implementationAddress": "0xe922828aC3d218874Bef13fAba6bD04C3E703930",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x8213cea0722c5b39d603CfD31d0c5Fc7abB64F7E#code"
+    },
+    "Artifacts": {
+      "proxyAddress": "0x552BFACEF312CF8Bf01d60351f615B8F622e35EB",
+      "implementationAddress": "0xE24330a3EADEA0d8C666bDf648EAae5c2ed4fFAA",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x552BFACEF312CF8Bf01d60351f615B8F622e35EB#code"
+    },
+    "Mining": {
+      "proxyAddress": "0x5D88AADBBd40376c623ed68286d7FdBA7BD31Ce0",
+      "implementationAddress": "0x0052Ad654ee74eE05CB535d0b67F63Ba4CF736fE",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x5D88AADBBd40376c623ed68286d7FdBA7BD31Ce0#code"
+    }
+  },
+  "bsc_mainnet": {
+    "Gem": {
+      "address": "",
+      "verification": ""
+    },
+    "Berry": {
+      "address": "",
+      "verification": ""
+    },
+    "Tree": {
+      "address": "",
+      "verification": ""
+    },
+    "Gold": {
+      "address": "",
+      "verification": ""
+    },
+    "BlackList": {
+      "address": "",
+      "verification": ""
+    },
+    "Tools": {
+      "proxyAddress": "",
+      "implementationAddress": "",
+      "proxyVerification": ""
+    },
+    "Artifacts": {
+      "proxyAddress": "",
+      "implementationAddress": "",
+      "proxyVerification": ""
+    },
+    "Mining": {
+      "proxyAddress": "",
+      "implementationAddress": "",
+      "proxyVerification": ""
+    }
+  }
+}
