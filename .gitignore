@@ -6,7 +6,9 @@ typechain
 typechain-types
 
 cache
-artifacts/
+artifacts/@openzeppelin/
+artifacts/build-info
+
 
 *.env
 
