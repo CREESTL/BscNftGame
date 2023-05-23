@@ -446,7 +446,6 @@ describe("Tools tests", async () => {
     });
 
     it("repair tool after minig", async () => {
-      console.log("berry addr: ", berry.address);
       await berry.mint(acc1.address, 400);
       await gold.mint(acc1.address, 400);
 
