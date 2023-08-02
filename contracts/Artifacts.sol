@@ -26,9 +26,9 @@ contract Artifacts is
 
     mapping(uint256 => string) _typesToUris;
 
-    event AddNewArtifact(uint256);
-    event BaseUriChanged(string);
-    event UriChanged(uint256, string);
+    event AddNewArtifact(uint256 artifactType);
+    event BaseUriChanged(string newBaseUri);
+    event UriChanged(uint256 artifactType, string newUri);
 
     modifier isInBlacklist(address user) {
         require(!_blacklist.check(user), "Artifacts: user in blacklist");

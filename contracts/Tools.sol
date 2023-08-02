@@ -70,7 +70,7 @@ contract Tools is
     mapping(address => mapping(uint256 => OwnedTool)) private _ownedTools;
 
     event AddTool(uint256 toolType);
-    event Craft(address user, uint256);
+    event Craft(address user, uint256 toolType);
     event RecipeCreatedOrUpdated(
         uint256 toolType,
         uint256 resourcesAmount,
