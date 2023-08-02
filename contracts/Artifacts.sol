@@ -26,7 +26,7 @@ contract Artifacts is
 
     mapping(uint256 => string) _typesToUris;
 
-    event AddNewArtifact(uint256 artifactType);
+    event AddNewArtifact(uint256 artifactType, string newUri);
     event BaseUriChanged(string newBaseUri);
     event UriChanged(uint256 artifactType, string newUri);
 
@@ -96,8 +96,8 @@ contract Artifacts is
         }
     }
 
-    function addNewArtifact() public onlyOwner {
-        _addNewArtifact();
+    function addNewArtifact(string memory newUri) public onlyOwner {
+        _addNewArtifact(newUri);
     }
 
     function setToolsAddress(address toolsAddress) external onlyOwner {
@@ -134,18 +134,18 @@ contract Artifacts is
         return _artifactTypes;
     }
 
-    function _addNewArtifact() private {
+    function _addNewArtifact(string memory newUri) private {
         _artifactTypes += 1;
         _tools.increaseArtifactAmount();
-        // New artifact gets URI formed from base URI and artifact's type
+        // New artifact gets URI formed from base URI and uri from parameters
+        // Example: ipfs://pinata.cloud/QmYqiEcxH58aTuQha2qxHp6c3zfv5NpNWxAhGQtGpBubwe
         _typesToUris[_artifactTypes] = string(
             abi.encodePacked(
                 _baseURI,
-                Strings.toString(_artifactTypes),
-                ".json"
+                newUri
             )
         );
-        emit AddNewArtifact(_artifactTypes);
+        emit AddNewArtifact(_artifactTypes, newUri);
     }
 
     function _setBaseUri(string calldata newBaseUri) private {
