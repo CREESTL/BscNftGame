@@ -14,6 +14,16 @@ const BASE_URI = process.env.BASE_URI;
 
 let contractName;
 
+
+let artifactURIs = [
+  "QmdC3otayo1QaoEA9Jf2Czvz2hHuX2w8umM1Kji7wZgNyH",
+  "QmQrKjnhRo8rGrqDC6JjMfgAme3Poan96v1ri5EY28TN2P",
+  "QmXKsHDa9TNkBZ8DEjxJTBcQFbSCvsv1XZTJz8YvgfjbWR",
+  "QmVn9bhbdH68pgE5rBppAa4FcgoAvoVyXLVcH64wQ82Htm",
+  "QmX54LcHuaVxd4mjPLUmXaPbJaTCgymrCuzHUBXD6JSSfe",
+  "QmQtGq6Hxp9AAPes85ciJfjU1gCktHS319BAq5umoNEdEL",
+];
+
 async function main() {
   console.log(`[NOTICE!] Chain of deployment: ${network.name}`);
 
@@ -359,8 +369,10 @@ async function main() {
   await delay(90000);
 
   // Add first 6 artifacts
-  for (i = 0; i < 6; i++) {
-    await artifacts.addNewArtifact();
+  // TODO get URI for them
+  for (let i = 0; i < artifactURIs.length; i++) {
+    await artifacts.addNewArtifact(artifactURIs[i]);
+    console.log("Added artifact with URL: ", artifactURIs[i]);
   }
 
   console.log(`[Tools][Proxy]: Artifacts added!`);
