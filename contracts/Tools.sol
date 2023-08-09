@@ -69,7 +69,7 @@ contract Tools is
     // user address => (tool id => OwnedTool)
     mapping(address => mapping(uint256 => OwnedTool)) private _ownedTools;
 
-    event AddTool(uint256 toolType);
+    event AddTool(uint256 toolType, string newURI);
     event Craft(address user, uint256 toolType);
     event RecipeCreatedOrUpdated(
         uint256 toolType,
@@ -178,7 +178,7 @@ contract Tools is
         _tools[newType].energyCost = energyCost;
         _tools[newType].strengthCost = strengthCost;
 
-        emit AddTool(newType);
+        emit AddTool(newType, newURI);
         setURI(newType, newURI);
         setRecipe(newType, resourcesAmount, artifactsAmount);
         return newType;
