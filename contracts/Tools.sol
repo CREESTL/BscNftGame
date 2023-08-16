@@ -70,7 +70,7 @@ contract Tools is
     mapping(address => mapping(uint256 => OwnedTool)) private _ownedTools;
 
     event AddTool(uint256 toolType, string newURI);
-    event Craft(address user, uint256 toolType);
+    event Craft(address user, uint256 toolType, uint256 toolId);
     event RecipeCreatedOrUpdated(
         uint256 toolType,
         uint256 resourcesAmount,
@@ -79,6 +79,26 @@ contract Tools is
     event BaseURI(string baseURI);
     event ToolRepaired(uint256 toolId);
     event ToolPropertiesSet(uint256 toolType);
+    /// @dev Indicates that `amount` of tools of `toolType` was minted to `to`
+    event MintType(
+        address to,
+        uint256 toolType,
+        uint256 amount
+    );
+    /// @dev Indicates that one tool of `toolType` with `toolId` was minted to `to`
+    event MintId(
+        address to,
+        uint256 toolType,
+        uint256 toolId
+    );
+    /// @dev Indicates that one tool of type `toolType` with `toolId` was transferred 
+    ///      from `from` to `to`
+    event Transfer(
+        address from,
+        address to,
+        uint256 toolType,
+        uint256 toolId
+    );
 
     modifier isInBlacklist(address user) {
         require(!_blacklist.check(user), "Tools: user in blacklist");
@@ -215,12 +235,14 @@ contract Tools is
         require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
 
         _mint(to, toolType, amount, "");
+        emit MintType(to, toolType, amount);
         for (uint256 counter = 0; counter < amount; counter++) {
             _toolIds++;
             _ownedTools[to][_toolIds] = OwnedTool({
                 toolType: toolType,
                 strength: _tools[toolType].maxStrength
             });
+            emit MintId(to, toolType, _toolIds);
         }
     }
 
@@ -240,6 +262,7 @@ contract Tools is
 
         _mintBatch(to, toolTypes, amounts, data);
         for (uint256 counter = 0; counter < toolTypes.length; counter++) {
+            emit MintType(to, toolTypes[counter], amounts[counter]);
             for (uint256 i = 0; i < amounts.length; i++) {
                 _toolIds++;
                 _ownedTools[to][_toolIds].toolType = uint128(
@@ -247,6 +270,7 @@ contract Tools is
                 );
                 _ownedTools[to][_toolIds].strength = _tools[toolTypes[counter]]
                     .maxStrength;
+                emit MintId(to, toolTypes[counter], _toolIds);
             }
         }
     }
@@ -368,7 +392,7 @@ contract Tools is
             strength: _tools[toolType].maxStrength
         });
 
-        emit Craft(_msgSender(), toolType);
+        emit Craft(_msgSender(), toolType, _toolIds);
     }
 
     // ----------- Repair Functions -----------
@@ -523,6 +547,7 @@ contract Tools is
         require(toolType > 0, "Tools: tool doesn't exist");
 
         super.safeTransferFrom(from, to, toolType, amount, data);
+        emit Transfer(from, to, toolType, toolId);
         _ownedTools[to][toolId] = _ownedTools[from][toolId];
         delete _ownedTools[from][toolId];
     }

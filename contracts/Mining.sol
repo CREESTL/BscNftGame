@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "./interfaces/ITools.sol";
 import "./interfaces/IBlackList.sol";
@@ -21,6 +22,8 @@ contract Mining is
     ITools private _tools;
     IBlackList private _blacklist;
 
+    using ECDSA for bytes32;
+
     address private _zeroAddress;
     // user address => (toolId => MinigSession)
     mapping(address => mapping(uint256 => MiningSession)) _session;
@@ -28,6 +31,9 @@ contract Mining is
     mapping(address => mapping(uint256 => uint256)) availableResources;
     // user address => artifacts type => amount
     mapping(address => mapping(uint256 => uint256)) availableArtifacts;
+    /// @notice Marks transaction hashes that have been executed already.
+    ///         Prevents Replay Attacks
+    mapping(bytes32 => bool) private _executed;
 
     struct MiningSession {
         uint32 endTime;
@@ -35,6 +41,15 @@ contract Mining is
         uint16 toolType;
         uint16 strengthCost;
         bool started;
+    }
+    
+    struct Args {
+       uint256 toolId;
+       address user;
+       uint256 nonce;
+       bytes signature;
+       uint256[] resources;
+       uint256[] artifacts;
     }
 
     event MiningStarted(address user, MiningSession session);
@@ -99,37 +114,63 @@ contract Mining is
     function startMining(
         uint256 toolId,
         address user,
-        uint256[] memory resourcesAmount,
-        uint256[] memory artifactsAmount
-    ) external virtual onlyOwner whenNotPaused isInBlacklist(user) {
+        bytes calldata rewards,
+        bytes calldata signature,
+        uint256 nonce
+    ) external virtual whenNotPaused isInBlacklist(user) {
+
+        (uint256[] memory resourcesAmount, uint256[] memory artifactsAmount) = abi.decode(rewards, (uint256[], uint256[]));
+        
+        // Avoid "stack too deep"
+        Args memory args = Args ({
+            toolId: toolId,
+            user: user,
+            nonce: nonce,
+            signature: signature,
+            resources: resourcesAmount,
+            artifacts: artifactsAmount
+        });
+
         require(
-            !_session[user][toolId].started,
+            !_session[args.user][args.toolId].started,
             "Mining: this user already started mining process"
         );
+        
+        bytes32 txHash = _getTxHashMining(args.toolId, args.user, args.resources, args.artifacts, args.nonce);
+
+        require(!_executed[txHash], "Mining: already executed");
+        
+        require(_verifyBackendSignature(
+            args.signature, 
+            txHash
+            ), "Mining: invalid backend signature");
+            
+        _executed[txHash] = true;
+
         (
             uint256 toolType,
             uint256 strength,
             uint256 strengthCost,
             uint256 miningDuration,
             uint256 energyCost
-        ) = _tools.getToolProperties(user, toolId);
+        ) = _tools.getToolProperties(args.user, args.toolId);
 
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
         IResources resource = IResources(_tools.getResourceAddress(0));
 
-        _tools.safeTransferFrom(user, address(this), toolId, 1, "");
-        resource.transferFrom(user, _zeroAddress, energyCost);
+        _tools.safeTransferFrom(args.user, address(this), args.toolId, 1, "");
+        resource.transferFrom(args.user, _zeroAddress, energyCost);
 
-        _session[user][toolId] = MiningSession({
+        _session[args.user][args.toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
             energyCost: uint32(energyCost),
             toolType: uint16(toolType),
             strengthCost: uint16(strengthCost),
             started: true
         });
-        setRewards(user, resourcesAmount, artifactsAmount);
-        emit MiningStarted(user, _session[user][toolId]);
+        setRewards(args.user, args.resources, args.artifacts);
+        emit MiningStarted(args.user, _session[args.user][args.toolId]);
     }
 
     function endMining(
@@ -221,5 +262,47 @@ contract Mining is
     modifier isInBlacklist(address user) {
         require(!_blacklist.check(user), "User in blacklist");
         _;
+    }
+    
+    
+    /// @dev Verifies that message was signed by the backend
+    /// @param signature A signature used to sign the tx
+    /// @param txHash An unsigned hashed data
+    /// @return True if tx was signed by the backend (owner). Otherwise false.
+    function _verifyBackendSignature(
+        bytes memory signature,
+        bytes32 txHash
+    ) private view returns (bool) {
+        // Remove the "\x19Ethereum Signed Message:\n" prefix from the signature
+        bytes32 clearHash = txHash.toEthSignedMessageHash();
+        // Recover the address of the user who signed the tx
+        address recoveredUser = clearHash.recover(signature);
+        return recoveredUser == owner();
+    }
+    
+    /// @dev Calculates the hash of parameters of mining function and a nonce
+    /// @param toolId The ID of the tool used for mining
+    /// @param user The user who started mining
+    /// @param resourcesAmount The amount of resources to be mined
+    /// @param artifactsAmount The amount of artifacts to be mined
+    /// @param nonce The unique integer
+    function _getTxHashMining(
+        uint256 toolId,
+        address user,
+        uint256[] memory resourcesAmount,
+        uint256[] memory artifactsAmount,
+        uint256 nonce
+    ) public view returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(
+                    address(this),
+                    toolId,
+                    user,
+                    resourcesAmount,
+                    artifactsAmount,
+                    nonce
+                )
+            );
     }
 }
