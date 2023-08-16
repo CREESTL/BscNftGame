@@ -369,7 +369,6 @@ async function main() {
   await delay(90000);
 
   // Add first 6 artifacts
-  // TODO get URI for them
   for (let i = 0; i < artifactURIs.length; i++) {
     await artifacts.addNewArtifact(artifactURIs[i]);
     console.log("Added artifact with URL: ", artifactURIs[i]);
