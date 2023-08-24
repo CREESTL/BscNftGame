@@ -17,15 +17,16 @@ const keccak256 = ethers.utils.solidityKeccak256;
 // address: The address of the Mining contract to call
 // toolId: The ID of the tool used for mining
 // user: The user who started mining
-// rewards: ABI encoded arrays - resourcesAmount & artifactsAmount
+// recourcesAmount: The amount of recources to win after mining
+// artifactsAmount: The amount of artifacts to win after mining
 // nonce: The unique integer
-function getTxHashMining(address, toolId, user, rewards, nonce) {
+function getTxHashMining(address, toolId, user, recourcesAmount, artifactsAmount, nonce) {
     return keccak256(
         ["bytes"],
         [
             encodePacked(
-                ["address", "uint256", "address", "bytes", "uint256"],
-                [address, toolId, user, rewards, nonce]
+                ["address", "uint256", "address", "uint256[]", "uint256[]", "uint256"],
+                [address, toolId, user, recourcesAmount, artifactsAmount, nonce]
             ),
         ]
     );
@@ -37,13 +38,14 @@ function getTxHashMining(address, toolId, user, rewards, nonce) {
 // address: The address of the Mining contract to call
 // toolId: The ID of the tool used for mining
 // user: The user who started mining
-// rewards: ABI encoded arrays - resourcesAmount & artifactsAmount
+// recourcesAmount: The amount of recources to win after mining
+// artifactsAmount: The amount of artifacts to win after mining
 // nonce: The unique integer
-async function hashAndSignMining(address, toolId, user, rewards, nonce) {
+async function hashAndSignMining(address, toolId, user, recourcesAmount, artifactsAmount, nonce) {
     // Signature is prefixed with "\x19Ethereum Signed Message:\n"
     let signature = await backendAcc.signMessage(
         // Bytes hash should be converted to array before signing
-        arrayify(getTxHashMining(address, toolId, user, rewards, nonce))
+        arrayify(getTxHashMining(address, toolId, user, recourcesAmount, artifactsAmount, nonce))
     );
 
     return signature;
