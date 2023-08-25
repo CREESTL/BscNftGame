@@ -57,15 +57,11 @@ async function hashAndSignMining(address, toolId, user, recourcesAmount, artifac
 // artifactsAmount: The amount of artifacts to be mined (array)
 // Returns the ABI-encoded arrays
 function getRewardsHash(resourcesAmount, artifactsAmount) {
-    return keccak256(
-        ["bytes"],
-        [
-            encode(
-                ["uint256[]", "uint256[]"],
-                [resourcesAmount, artifactsAmount]
-            ),
-        ]
-    );
+    return encode
+    (
+        ["uint256[]", "uint256[]"],
+        [resourcesAmount, artifactsAmount]
+    )
 }
 
 module.exports = {
