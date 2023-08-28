@@ -38,7 +38,7 @@ contract Mining is
     struct MiningSession {
         uint32 endTime;
         uint32 energyCost;
-        uint16 toolType;
+        uint256 toolId;
         uint16 strengthCost;
         bool started;
     }
@@ -165,7 +165,7 @@ contract Mining is
         _session[args.user][args.toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
             energyCost: uint32(energyCost),
-            toolType: uint16(toolType),
+            toolId: uint16(args.toolId),
             strengthCost: uint16(strengthCost),
             started: true
         });
