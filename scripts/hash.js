@@ -6,7 +6,7 @@ const { arrayify } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
 const backendAcc = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY);
 const encodePacked = ethers.utils.solidityPack;
-const encode = ethers.utils.soliditySha256;
+const coder = ethers.utils.defaultAbiCoder;
 const keccak256 = ethers.utils.solidityKeccak256;
 
 
@@ -57,7 +57,7 @@ async function hashAndSignMining(address, toolId, user, recourcesAmount, artifac
 // artifactsAmount: The amount of artifacts to be mined (array)
 // Returns the ABI-encoded arrays
 function getRewardsHash(resourcesAmount, artifactsAmount) {
-    return encode
+    return coder.encode
     (
         ["uint256[]", "uint256[]"],
         [resourcesAmount, artifactsAmount]
