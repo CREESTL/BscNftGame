@@ -9,7 +9,7 @@ require("hardhat-contract-sizer");
 require("solidity-coverage");
 require("hardhat-gas-reporter");
 require("@primitivefi/hardhat-dodoc");
-require('hardhat-deploy');
+require("hardhat-deploy");
 
 const { BSCSCAN_API_KEY, ACC_PRIVATE_KEY } = process.env;
 
@@ -24,9 +24,9 @@ module.exports = {
     },
   },
   namedAccounts: {
-      deployer: {
-          default: 0
-      }
+    deployer: {
+      default: 0,
+    },
   },
   networks: {
     hardhat: {
@@ -40,18 +40,18 @@ module.exports = {
       accounts: [ACC_PRIVATE_KEY],
       verify: {
         etherscan: {
-          apiKey: BSCSCAN_API_KEY
-        }
-      }
+          apiKey: BSCSCAN_API_KEY,
+        },
+      },
     },
     bsc_testnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
       accounts: [ACC_PRIVATE_KEY],
       verify: {
         etherscan: {
-          apiKey: BSCSCAN_API_KEY
-        }
-      }
+          apiKey: BSCSCAN_API_KEY,
+        },
+      },
     },
   },
   mocha: {

@@ -1,29 +1,22 @@
 module.exports = async ({ getNamedAccounts, deployments }) => {
-    const { deploy, log, get } = deployments;
-    const { deployer } = await getNamedAccounts();
+  const { deploy, log, get } = deployments;
+  const { deployer } = await getNamedAccounts();
 
-    const BASE_URI = process.env.BASE_URI;
-    const blacklist = await get("BlackList");
-    const tools = await get("Tools");
+  const BASE_URI = process.env.BASE_URI;
+  const blacklist = await get("BlackList");
+  const tools = await get("Tools");
 
-    const deployResult = await deploy("Artifacts", {
-      from: deployer,
-      proxy: {
-          proxyContract: "OpenZeppelinTransparentProxy", 
-          execute: {
-              methodName: "initialize",
-              args: [
-                  tools.address,
-                  BASE_URI,
-                  blacklist.address
-              ]
-          }
-      }
-    });
-    if (deployResult.newlyDeployed) {
-        log(`Artifacts deployed at ${deployResult.address}`);
-    }
+  const deployResult = await deploy("Artifacts", {
+    from: deployer,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+      execute: {
+        methodName: "initialize",
+        args: [tools.address, BASE_URI, blacklist.address],
+      },
+    },
+  });
+  if (deployResult.newlyDeployed) {
+    log(`Artifacts deployed at ${deployResult.address}`);
+  }
 };
-
-
-

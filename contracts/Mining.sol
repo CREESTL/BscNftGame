@@ -43,14 +43,14 @@ contract Mining is
         bool started;
         uint32 nonce;
     }
-    
+
     struct Args {
-       uint256 toolId;
-       address user;
-       uint256 nonce;
-       bytes signature;
-       uint256[] resources;
-       uint256[] artifacts;
+        uint256 toolId;
+        address user;
+        uint256 nonce;
+        bytes signature;
+        uint256[] resources;
+        uint256[] artifacts;
     }
 
     event MiningStarted(address user, MiningSession session);
@@ -114,17 +114,18 @@ contract Mining is
 
     function startMining(
         uint256 toolId,
-        
         address user,
         bytes calldata rewards,
         bytes calldata signature,
         uint256 nonce
     ) external virtual whenNotPaused isInBlacklist(user) {
+        (
+            uint256[] memory resourcesAmount,
+            uint256[] memory artifactsAmount
+        ) = abi.decode(rewards, (uint256[], uint256[]));
 
-        (uint256[] memory resourcesAmount, uint256[] memory artifactsAmount) = abi.decode(rewards, (uint256[], uint256[]));
-        
         // Avoid "stack too deep"
-        Args memory args = Args ({
+        Args memory args = Args({
             toolId: toolId,
             user: user,
             nonce: nonce,
@@ -137,16 +138,22 @@ contract Mining is
             !_session[args.user][args.toolId].started,
             "Mining: this user already started mining process"
         );
-        
-        bytes32 txHash = _getTxHashMining(args.toolId, args.user, args.resources, args.artifacts, args.nonce);
+
+        bytes32 txHash = _getTxHashMining(
+            args.toolId,
+            args.user,
+            args.resources,
+            args.artifacts,
+            args.nonce
+        );
 
         require(!_executed[txHash], "Mining: already executed");
-        
-        require(_verifyBackendSignature(
-            args.signature, 
-            txHash
-            ), "Mining: invalid backend signature");
-            
+
+        require(
+            _verifyBackendSignature(args.signature, txHash),
+            "Mining: invalid backend signature"
+        );
+
         _executed[txHash] = true;
 
         (
@@ -266,8 +273,7 @@ contract Mining is
         require(!_blacklist.check(user), "User in blacklist");
         _;
     }
-    
-    
+
     /// @dev Verifies that message was signed by the backend
     /// @param signature A signature used to sign the tx
     /// @param txHash An unsigned hashed data
@@ -282,7 +288,7 @@ contract Mining is
         address recoveredUser = clearHash.recover(signature);
         return recoveredUser == owner();
     }
-    
+
     /// @dev Calculates the hash of parameters of mining function and a nonce
     /// @param toolId The ID of the tool used for mining
     /// @param user The user who started mining

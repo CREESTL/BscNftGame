@@ -199,4 +199,4 @@ npx hardhat run script/deploy.js --network testnet
 ## TODO
 
 - При деплое в мейннет (bsc_mainnet) закоментить части скрипта деплоя с верификацией кода контрактов на BSCScan. Код \*НЕ\_ должен быть виден на сканерах
-- При деплое в мейннет (bsc_mainnet) в .env файл поместить *реальный* BASE_URI  
+- При деплое в мейннет (bsc*mainnet) в .env файл поместить *реальный\_ BASE_URI

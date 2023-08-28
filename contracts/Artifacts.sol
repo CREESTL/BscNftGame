@@ -140,10 +140,7 @@ contract Artifacts is
         // New artifact gets URI formed from base URI and uri from parameters
         // Example: ipfs://pinata.cloud/QmYqiEcxH58aTuQha2qxHp6c3zfv5NpNWxAhGQtGpBubwe
         _typesToUris[_artifactTypes] = string(
-            abi.encodePacked(
-                _baseURI,
-                newUri
-            )
+            abi.encodePacked(_baseURI, newUri)
         );
         emit AddNewArtifact(_artifactTypes, newUri);
     }

@@ -14,7 +14,6 @@ const BASE_URI = process.env.BASE_URI;
 
 let contractName;
 
-
 let artifactURIs = [
   "QmdC3otayo1QaoEA9Jf2Czvz2hHuX2w8umM1Kji7wZgNyH",
   "QmQrKjnhRo8rGrqDC6JjMfgAme3Poan96v1ri5EY28TN2P",

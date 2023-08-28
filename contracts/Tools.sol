@@ -80,25 +80,12 @@ contract Tools is
     event ToolRepaired(uint256 toolId);
     event ToolPropertiesSet(uint256 toolType);
     /// @dev Indicates that `amount` of tools of `toolType` was minted to `to`
-    event MintType(
-        address to,
-        uint256 toolType,
-        uint256 amount
-    );
+    event MintType(address to, uint256 toolType, uint256 amount);
     /// @dev Indicates that one tool of `toolType` with `toolId` was minted to `to`
-    event MintId(
-        address to,
-        uint256 toolType,
-        uint256 toolId
-    );
-    /// @dev Indicates that one tool of type `toolType` with `toolId` was transferred 
+    event MintId(address to, uint256 toolType, uint256 toolId);
+    /// @dev Indicates that one tool of type `toolType` with `toolId` was transferred
     ///      from `from` to `to`
-    event Transfer(
-        address from,
-        address to,
-        uint256 toolType,
-        uint256 toolId
-    );
+    event Transfer(address from, address to, uint256 toolType, uint256 toolId);
 
     modifier isInBlacklist(address user) {
         require(!_blacklist.check(user), "Tools: user in blacklist");
