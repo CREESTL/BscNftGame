@@ -38,9 +38,10 @@ contract Mining is
     struct MiningSession {
         uint32 endTime;
         uint32 energyCost;
-        uint256 toolId;
+        uint32 toolId;
         uint16 strengthCost;
         bool started;
+        uint32 nonce;
     }
     
     struct Args {
@@ -113,6 +114,7 @@ contract Mining is
 
     function startMining(
         uint256 toolId,
+        
         address user,
         bytes calldata rewards,
         bytes calldata signature,
@@ -165,9 +167,10 @@ contract Mining is
         _session[args.user][args.toolId] = MiningSession({
             endTime: uint32(block.timestamp + miningDuration),
             energyCost: uint32(energyCost),
-            toolId: uint16(args.toolId),
+            toolId: uint32(args.toolId),
             strengthCost: uint16(strengthCost),
-            started: true
+            started: true,
+            nonce: uint32(args.nonce)
         });
         setRewards(args.user, args.resources, args.artifacts);
         emit MiningStarted(args.user, _session[args.user][args.toolId]);
