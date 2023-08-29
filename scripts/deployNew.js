@@ -374,6 +374,23 @@ async function main() {
   }
 
   console.log(`[Tools][Proxy]: Artifacts added!`);
+  
+  let totalSupply = await berry.totalSupply();
+  let transferAmount = totalSupply.mul(9900).div(10000);
+
+  [ownerAcc, ] = await ethers.getSigners();
+
+  console.log("[Berry]: Transferring 99% of total supply to Mining");
+  await berry.connect(ownerAcc).transfer(mining.address, transferAmount);
+  console.log("[Berry]: Tokens have been transferred to Mining");
+
+  console.log("[Tree]: Transferring 99% of total supply to Mining");
+  await tree.connect(ownerAcc).transfer(mining.address, transferAmount);
+  console.log("[Tree]: Tokens have been transferred to Mining");
+
+  console.log("[Gold]: Transferring 99% of total supply to Mining");
+  await gold.connect(ownerAcc).transfer(mining.address, transferAmount);
+  console.log("[Gold]: Tokens have been transferred to Mining");
 
   // ====================================================
 
