@@ -9,6 +9,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../interfaces/UniswapInterfaces.sol";
 
+interface IGEM {
+    function compensateBnb(address to, uint256 bnbAmount) external;
+}
+
 contract PocMon is Ownable, IERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -92,46 +96,53 @@ contract PocMon is Ownable, IERC20 {
         emit Transfer(address(0), owner(), _tTotal);
     }
 
-    function name() public view returns (string memory) {
-        return _name;
+    receive() external payable {}
+
+    function isExcludedFromReward(
+        address account
+    ) external view returns (bool) {
+        return _isExcluded[account];
     }
 
-    function symbol() public view returns (string memory) {
-        return _symbol;
+    function isExcludedFromFee(address account) external view returns (bool) {
+        return _isExcludedFromFee[account];
     }
 
-    function decimals() public view returns (uint256) {
-        return _decimals;
+    function reflectionFee() external view returns (uint256) {
+        return _reflectionFee;
     }
 
-    function totalSupply() public view override returns (uint256) {
-        return _tTotal;
+    function gemFee() external view returns (uint256) {
+        return _gemFee;
     }
 
-    function balanceOf(address account) public view override returns (uint256) {
-        if (_isExcluded[account]) return _tOwned[account];
-        return tokenFromReflection(_rOwned[account]);
-    }
-
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) public override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
-        return true;
+    function liquidityFee() external view returns (uint256) {
+        return _liquidityFee;
     }
 
     function allowance(
         address owner,
         address spender
-    ) public view override returns (uint256) {
+    ) external view override returns (uint256) {
         return _allowances[owner][spender];
+    }
+
+    function gemWallet() external view returns (address) {
+        return _gemWalletAddress;
+    }
+
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) external override returns (bool) {
+        _transfer(_msgSender(), recipient, amount);
+        return true;
     }
 
     function approve(
         address spender,
         uint256 amount
-    ) public override returns (bool) {
+    ) external override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -140,7 +151,7 @@ contract PocMon is Ownable, IERC20 {
         address sender,
         address recipient,
         uint256 amount
-    ) public override returns (bool) {
+    ) external override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -156,7 +167,7 @@ contract PocMon is Ownable, IERC20 {
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    ) public virtual returns (bool) {
+    ) external returns (bool) {
         _approve(
             _msgSender(),
             spender,
@@ -165,10 +176,27 @@ contract PocMon is Ownable, IERC20 {
         return true;
     }
 
+    function setRouterAddress(address newRouter) external onlyOwner {
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(newRouter);
+        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+            .createPair(address(this), _uniswapV2Router.WETH());
+        uniswapV2Router = _uniswapV2Router;
+    }
+
+    function setNumTokensSellToAddToLiquidity(
+        uint256 amountToUpdate
+    ) external onlyOwner {
+        numTokensSellToAddToLiquidity = amountToUpdate;
+    }
+
+    function setGemWallet(address payable gemWalletAddress) external onlyOwner {
+        _gemWalletAddress = gemWalletAddress;
+    }
+
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) public virtual returns (bool) {
+    ) external returns (bool) {
         _approve(
             _msgSender(),
             spender,
@@ -180,8 +208,74 @@ contract PocMon is Ownable, IERC20 {
         return true;
     }
 
-    function isExcludedFromReward(address account) public view returns (bool) {
-        return _isExcluded[account];
+    function excludeFromReward(address account) external onlyOwner {
+        require(!_isExcluded[account], "Account is already excluded");
+        if (_rOwned[account] > 0) {
+            _tOwned[account] = tokenFromReflection(_rOwned[account]);
+        }
+        _isExcluded[account] = true;
+        _excluded.push(account);
+    }
+
+    function includeInReward(address account) external onlyOwner {
+        require(_isExcluded[account], "Account is already included");
+        for (uint256 i = 0; i < _excluded.length; i++) {
+            if (_excluded[i] == account) {
+                _excluded[i] = _excluded[_excluded.length - 1];
+                _tOwned[account] = 0;
+                _isExcluded[account] = false;
+                _excluded.pop();
+                break;
+            }
+        }
+    }
+
+    function excludeFromFee(address account) external onlyOwner {
+        _isExcludedFromFee[account] = true;
+    }
+
+    function includeInFee(address account) external onlyOwner {
+        _isExcludedFromFee[account] = false;
+    }
+
+    function setReflectionFeePercent(
+        uint256 reflectionFee_
+    ) external onlyOwner {
+        require(
+            reflectionFee_ + _liquidityFee + _gemFee < 15,
+            "You have reached fee limit"
+        );
+        _reflectionFee = reflectionFee_;
+    }
+
+    function setGemFeePercent(uint256 gemFee_) external onlyOwner {
+        require(
+            _reflectionFee + _liquidityFee + gemFee_ < 15,
+            "You have reached fee limit"
+        );
+        _gemFee = gemFee_;
+    }
+
+    // !
+    function setLiquidityFeePercent(uint256 liquidityFee_) external onlyOwner {
+        require(
+            _reflectionFee + liquidityFee_ + _gemFee < 15,
+            "You have reached fee limit"
+        );
+        _liquidityFee = liquidityFee_;
+    }
+
+    function setMaxTxAmount(uint256 maxTxAmount) external onlyOwner {
+        require(
+            maxTxAmount >= 1_500_000 * 10 ** 9,
+            "maxTxAmount should be greater than 1500000e9"
+        );
+        _maxTxAmount = maxTxAmount;
+    }
+
+    function setSwapAndLiquifyEnabled(bool _enabled) external onlyOwner {
+        swapAndLiquifyEnabled = _enabled;
+        emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
 
     function reflectionFromToken(
@@ -209,97 +303,66 @@ contract PocMon is Ownable, IERC20 {
         return rAmount.div(currentRate);
     }
 
-    function excludeFromReward(address account) public onlyOwner {
-        require(!_isExcluded[account], "Account is already excluded");
-        if (_rOwned[account] > 0) {
-            _tOwned[account] = tokenFromReflection(_rOwned[account]);
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+
+    function decimals() public view returns (uint256) {
+        return _decimals;
+    }
+
+    function totalSupply() public view override returns (uint256) {
+        return _tTotal;
+    }
+
+    function balanceOf(address account) public view override returns (uint256) {
+        if (_isExcluded[account]) return _tOwned[account];
+        return tokenFromReflection(_rOwned[account]);
+    }
+
+    function _getBnbEquivalent(uint256 amount) internal view returns (uint256) {
+        if (!uniswapV2Pair.isContract()) {
+            return 0;
         }
-        _isExcluded[account] = true;
-        _excluded.push(account);
-    }
-
-    function includeInReward(address account) external onlyOwner {
-        require(_isExcluded[account], "Account is already included");
-        for (uint256 i = 0; i < _excluded.length; i++) {
-            if (_excluded[i] == account) {
-                _excluded[i] = _excluded[_excluded.length - 1];
-                _tOwned[account] = 0;
-                _isExcluded[account] = false;
-                _excluded.pop();
-                break;
-            }
+        IUniswapV2Pair pair = IUniswapV2Pair(uniswapV2Pair);
+        uint256 reserve0;
+        uint256 reserve1;
+        try pair.getReserves() returns (
+            uint112 reserve0_,
+            uint112 reserve1_,
+            uint32
+        ) {
+            reserve0 = reserve0_;
+            reserve1 = reserve1_;
+        } catch {
+            return 0;
         }
+
+        if (reserve0 == 0) {
+            return 0;
+        }
+        return (amount * reserve1) / reserve0;
     }
 
-    function excludeFromFee(address account) public onlyOwner {
-        _isExcludedFromFee[account] = true;
-    }
-
-    function includeInFee(address account) public onlyOwner {
-        _isExcludedFromFee[account] = false;
-    }
-
-    // !
-    function setReflectionFeePercent(
-        uint256 reflectionFee_
-    ) external onlyOwner {
-        require(
-            reflectionFee_ + _liquidityFee + _gemFee < 15,
-            "You have reached fee limit"
+    function _getRValues(
+        uint256 tAmount,
+        uint256 tReflectionFee,
+        uint256 tGemFee,
+        uint256 tLiquidity,
+        uint256 currentRate
+    ) private pure returns (uint256, uint256, uint256) {
+        uint256 rAmount = tAmount.mul(currentRate);
+        uint256 rReflectionFee = tReflectionFee.mul(currentRate);
+        uint256 rGemFee = tGemFee.mul(currentRate);
+        uint256 rLiquidity = tLiquidity.mul(currentRate);
+        uint256 rTransferAmount = rAmount.sub(rReflectionFee).sub(rGemFee).sub(
+            rLiquidity
         );
-        _reflectionFee = reflectionFee_;
-    }
-
-    // !
-    function setGemFeePercent(uint256 gemFee_) external onlyOwner {
-        require(
-            _reflectionFee + _liquidityFee + gemFee_ < 15,
-            "You have reached fee limit"
-        );
-        _gemFee = gemFee_;
-    }
-
-    // !
-    function setLiquidityFeePercent(uint256 liquidityFee_) external onlyOwner {
-        require(
-            _reflectionFee + liquidityFee_ + _gemFee < 15,
-            "You have reached fee limit"
-        );
-        _liquidityFee = liquidityFee_;
-    }
-
-    // !
-    function setMaxTxAmount(uint256 maxTxAmount) public onlyOwner {
-        require(
-            maxTxAmount >= 1_500_000 * 10 ** 9,
-            "maxTxAmount should be greater than 1500000e9"
-        );
-        _maxTxAmount = maxTxAmount;
-    }
-
-    function setSwapAndLiquifyEnabled(bool _enabled) public onlyOwner {
-        swapAndLiquifyEnabled = _enabled;
-        emit SwapAndLiquifyEnabledUpdated(_enabled);
-    }
-
-    function reflectionFee() external view returns (uint256) {
-        return _reflectionFee;
-    }
-
-    function gemFee() external view returns (uint256) {
-        return _gemFee;
-    }
-
-    function liquidityFee() external view returns (uint256) {
-        return _liquidityFee;
-    }
-
-    //to recieve ETH from uniswapV2Router when swaping
-    receive() external payable {}
-
-    function _reflectFee(uint256 rFee, uint256 tFee) private {
-        _rTotal = _rTotal.sub(rFee);
-        _tFeeTotal = _tFeeTotal.add(tFee);
+        return (rAmount, rTransferAmount, rReflectionFee);
     }
 
     function _getValues(
@@ -348,23 +411,6 @@ contract PocMon is Ownable, IERC20 {
         return (tTransferAmount, tReflectionFee, tGemFee, tLiquidity);
     }
 
-    function _getRValues(
-        uint256 tAmount,
-        uint256 tReflectionFee,
-        uint256 tGemFee,
-        uint256 tLiquidity,
-        uint256 currentRate
-    ) private pure returns (uint256, uint256, uint256) {
-        uint256 rAmount = tAmount.mul(currentRate);
-        uint256 rReflectionFee = tReflectionFee.mul(currentRate);
-        uint256 rGemFee = tGemFee.mul(currentRate);
-        uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 rTransferAmount = rAmount.sub(rReflectionFee).sub(rGemFee).sub(
-            rLiquidity
-        );
-        return (rAmount, rTransferAmount, rReflectionFee);
-    }
-
     function _getRate() private view returns (uint256) {
         (uint256 rSupply, uint256 tSupply) = _getCurrentSupply();
         return rSupply.div(tSupply);
@@ -385,14 +431,6 @@ contract PocMon is Ownable, IERC20 {
         return (rSupply, tSupply);
     }
 
-    function _takeLiquidity(uint256 tLiquidity) private {
-        uint256 currentRate = _getRate();
-        uint256 rLiquidity = tLiquidity.mul(currentRate);
-        _rOwned[address(this)] = _rOwned[address(this)].add(rLiquidity);
-        if (_isExcluded[address(this)])
-            _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
-    }
-
     function calculateReflectionFee(
         uint256 _amount
     ) private view returns (uint256) {
@@ -409,6 +447,19 @@ contract PocMon is Ownable, IERC20 {
         return _amount.mul(_liquidityFee).div(10 ** 2);
     }
 
+    function _reflectFee(uint256 rFee, uint256 tFee) private {
+        _rTotal = _rTotal.sub(rFee);
+        _tFeeTotal = _tFeeTotal.add(tFee);
+    }
+
+    function _takeLiquidity(uint256 tLiquidity) private {
+        uint256 currentRate = _getRate();
+        uint256 rLiquidity = tLiquidity.mul(currentRate);
+        _rOwned[address(this)] = _rOwned[address(this)].add(rLiquidity);
+        if (_isExcluded[address(this)])
+            _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
+    }
+
     function removeAllFee() private {
         _previousReflectionFee = _reflectionFee;
         _previousGemFee = _gemFee;
@@ -423,31 +474,6 @@ contract PocMon is Ownable, IERC20 {
         _reflectionFee = _previousReflectionFee;
         _gemFee = _previousGemFee;
         _liquidityFee = _previousLiquidityFee;
-    }
-
-    function setRouterAddress(address newRouter) external onlyOwner {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(newRouter);
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
-        uniswapV2Router = _uniswapV2Router;
-    }
-
-    function setNumTokensSellToAddToLiquidity(
-        uint256 amountToUpdate
-    ) external onlyOwner {
-        numTokensSellToAddToLiquidity = amountToUpdate;
-    }
-
-    function setGemWallet(address payable gemWalletAddress) external onlyOwner {
-        _gemWalletAddress = gemWalletAddress;
-    }
-
-    function gemWallet() external view returns (address) {
-        return _gemWalletAddress;
-    }
-
-    function isExcludedFromFee(address account) public view returns (bool) {
-        return _isExcludedFromFee[account];
     }
 
     function _approve(address owner, address spender, uint256 amount) private {
@@ -576,30 +602,6 @@ contract PocMon is Ownable, IERC20 {
         if (!takeFee) restoreAllFee();
     }
 
-    function _getBnbEquivalent(uint256 amount) internal view returns (uint256) {
-        if (!uniswapV2Pair.isContract()) {
-            return 0;
-        }
-        IUniswapV2Pair pair = IUniswapV2Pair(uniswapV2Pair);
-        uint256 reserve0;
-        uint256 reserve1;
-        try pair.getReserves() returns (
-            uint112 reserve0_,
-            uint112 reserve1_,
-            uint32
-        ) {
-            reserve0 = reserve0_;
-            reserve1 = reserve1_;
-        } catch {
-            return 0;
-        }
-
-        if (reserve0 == 0) {
-            return 0;
-        }
-        return (amount * reserve1) / reserve0;
-    }
-
     function _compensateFee(
         address sender,
         address recipient,
@@ -698,8 +700,4 @@ contract PocMon is Ownable, IERC20 {
         _compensateFee(sender, recipient, tFee + tLiquidity);
         emit Transfer(sender, recipient, tTransferAmount);
     }
-}
-
-interface IGEM {
-    function compensateBnb(address to, uint256 bnbAmount) external;
 }

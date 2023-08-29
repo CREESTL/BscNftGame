@@ -30,16 +30,24 @@ contract Artifacts is
     event BaseUriChanged(string newBaseUri);
     event UriChanged(uint256 artifactType, string newUri);
 
-    modifier isInBlacklist(address user) {
+    modifier ifNotBlacklisted(address user) {
         require(!_blacklist.check(user), "Artifacts: user in blacklist");
         _;
+    }
+
+    function getArtifactsTypesAmount() external view returns (uint256) {
+        return _artifactTypes;
+    }
+
+    function getBaseUri() external view returns (string memory) {
+        return _baseURI;
     }
 
     function initialize(
         address _toolsContractAddress,
         string memory _baseUrl,
         address _blackListContractAddress
-    ) public initializer {
+    ) external initializer {
         _tools = ITools(_toolsContractAddress);
         _baseURI = _baseUrl;
         _blacklist = IBlackList(_blackListContractAddress);
@@ -54,7 +62,7 @@ contract Artifacts is
         address to,
         uint256 amount,
         bytes memory data
-    ) external onlyOwner whenNotPaused isInBlacklist(to) {
+    ) external onlyOwner whenNotPaused ifNotBlacklisted(to) {
         require(
             artifactType <= _artifactTypes,
             "Artifacts: This artifact doesn't exist"
@@ -67,7 +75,7 @@ contract Artifacts is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) external onlyOwner whenNotPaused isInBlacklist(to) {
+    ) external onlyOwner whenNotPaused ifNotBlacklisted(to) {
         for (uint256 counter = 0; counter < ids.length; counter++) {
             require(
                 ids[counter] <= _artifactTypes,
@@ -86,8 +94,6 @@ contract Artifacts is
         _mint(user, artifactType, 1, "");
     }
 
-    // ----------------------------
-    // administration
     function pause() external onlyOwner {
         if (!paused()) {
             _pause();
@@ -96,17 +102,13 @@ contract Artifacts is
         }
     }
 
-    function addNewArtifact(string memory newUri) public onlyOwner {
+    function addNewArtifact(string memory newUri) external onlyOwner {
         _addNewArtifact(newUri);
     }
 
     function setToolsAddress(address toolsAddress) external onlyOwner {
         require(toolsAddress != address(0), "Artifacts: zero address");
         _tools = ITools(toolsAddress);
-    }
-
-    function getBaseUri() external view returns (string memory) {
-        return _baseURI;
     }
 
     function setBaseUri(string calldata newBaseUri) external onlyOwner {
@@ -128,10 +130,6 @@ contract Artifacts is
             "Artifacts: This artifact doesn't exist"
         );
         return _typesToUris[artifactType];
-    }
-
-    function getArtifactsTypesAmount() external view returns (uint256) {
-        return _artifactTypes;
     }
 
     function _addNewArtifact(string memory newUri) private {

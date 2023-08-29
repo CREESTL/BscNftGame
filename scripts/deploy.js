@@ -374,11 +374,11 @@ async function main() {
   }
 
   console.log(`[Tools][Proxy]: Artifacts added!`);
-  
+
   let totalSupply = await berry.totalSupply();
   let transferAmount = totalSupply.mul(9900).div(10000);
 
-  [ownerAcc, ] = await ethers.getSigners();
+  [ownerAcc] = await ethers.getSigners();
 
   console.log("[Berry]: Transferring 99% of total supply to Mining");
   await berry.connect(ownerAcc).transfer(mining.address, transferAmount);

@@ -6,17 +6,12 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Gem is Ownable, ERC20 {
     address public compensator;
-
     uint256 public compensationRate;
 
     mapping(address => bool) public blocked;
 
     constructor(uint256 compensationRate_) ERC20("GEM", "GEM") Ownable() {
         compensationRate = compensationRate_;
-    }
-
-    function decimals() public pure override returns (uint8) {
-        return 9;
     }
 
     function setCompensator(address compensator_) external onlyOwner {
@@ -35,6 +30,10 @@ contract Gem is Ownable, ERC20 {
         if (msg.sender == compensator) {
             _mint(to, (bnbAmount * compensationRate) / 10 ** 9);
         }
+    }
+
+    function decimals() public pure override returns (uint8) {
+        return 9;
     }
 
     function _beforeTokenTransfer(
