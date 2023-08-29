@@ -1,39 +1,39 @@
 {
   "bsc_testnet": {
     "Gem": {
-      "address": "0x839D05852A8D7d15623a9e430e9Ce491DbcFe0b1",
-      "verification": "https://testnet.bscscan.com/address/0x839D05852A8D7d15623a9e430e9Ce491DbcFe0b1#code"
+      "address": "0x00f316451F7E64ac8134501F773e2dce237Ca838",
+      "verification": "https://testnet.bscscan.com/address/0x00f316451F7E64ac8134501F773e2dce237Ca838#code"
     },
     "Berry": {
-      "address": "0x084746aFAaE7BD0F3B1A30A14c42950c128Cb16d",
-      "verification": "https://testnet.bscscan.com/address/0x084746aFAaE7BD0F3B1A30A14c42950c128Cb16d#code"
+      "address": "0x43a1a8c9956311AdbF2cdDbB4359F9406294A970",
+      "verification": "https://testnet.bscscan.com/address/0x43a1a8c9956311AdbF2cdDbB4359F9406294A970#code"
     },
     "Tree": {
-      "address": "0xdF4426b252D1A3CDB3848AA8a60daBf9409156f8",
-      "verification": "https://testnet.bscscan.com/address/0xdF4426b252D1A3CDB3848AA8a60daBf9409156f8#code"
+      "address": "0x2329D5a7F37a0F4B6F81F44FD49C1769fe101524",
+      "verification": "https://testnet.bscscan.com/address/0x2329D5a7F37a0F4B6F81F44FD49C1769fe101524#code"
     },
     "Gold": {
-      "address": "0x01A6d0C11d46C528628e802BBA73707A2089bb0A",
-      "verification": "https://testnet.bscscan.com/address/0x01A6d0C11d46C528628e802BBA73707A2089bb0A#code"
+      "address": "0xddf75902D8849887c4F1C4E54e0E899586dBBa40",
+      "verification": "https://testnet.bscscan.com/address/0xddf75902D8849887c4F1C4E54e0E899586dBBa40#code"
     },
     "BlackList": {
-      "address": "0x22aAEc0d783f95dF1863D4884283f2d056d6a9b9",
-      "verification": "https://testnet.bscscan.com/address/0x22aAEc0d783f95dF1863D4884283f2d056d6a9b9#code"
+      "address": "0x262C4428d3f566A47d0516eb0b6f5dB7e4BCb7BE",
+      "verification": "https://testnet.bscscan.com/address/0x262C4428d3f566A47d0516eb0b6f5dB7e4BCb7BE#code"
     },
     "Tools": {
-      "proxyAddress": "0xBaa4e551cFACc8F3F42C7D6dd1deCfA6774fcfD4",
-      "implementationAddress": "0x2D067dd2c0Cc4384F6445286110299E794c3dF53",
-      "proxyVerification": "https://testnet.bscscan.com/address/0xBaa4e551cFACc8F3F42C7D6dd1deCfA6774fcfD4#code"
+      "proxyAddress": "0x9944c14D9496993c000c5b09Ed61Ee504860cB25",
+      "implementationAddress": "0xCe21f7a53Ff3e61B323A6Fb41167ed934Fcb38a2",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x9944c14D9496993c000c5b09Ed61Ee504860cB25#code"
     },
     "Artifacts": {
-      "proxyAddress": "0x309a4bfF6A656c3ab0f134D3223f037975A89FbF",
-      "implementationAddress": "0xC2A0E0Ae4B8c20036828768050358d985fCA0224",
-      "proxyVerification": "https://testnet.bscscan.com/address/0x309a4bfF6A656c3ab0f134D3223f037975A89FbF#code"
+      "proxyAddress": "0x8d3d4fcAaB96A11DFD4f1Fb39C4E0890401bAA09",
+      "implementationAddress": "0x23387556E6ed3836b9F34fb1965A36C216D7e5EB",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x8d3d4fcAaB96A11DFD4f1Fb39C4E0890401bAA09#code"
     },
     "Mining": {
-      "proxyAddress": "0x44d2e5b0DbD2ea841EcaA96eA5DFb65806Ee1A1a",
-      "implementationAddress": "0x30d52D4C78e4FC19D54370a0071eb866a55b1d7D",
-      "proxyVerification": "https://testnet.bscscan.com/address/0x44d2e5b0DbD2ea841EcaA96eA5DFb65806Ee1A1a#code"
+      "proxyAddress": "0x5eb03Fb22D16b2588685939931F98a8b7D0644aC",
+      "implementationAddress": "0xb8Ec4fE38b21cfB1079d50Da7Fb654729bf1bb4F",
+      "proxyVerification": "https://testnet.bscscan.com/address/0x5eb03Fb22D16b2588685939931F98a8b7D0644aC#code"
     }
   },
   "bsc_mainnet": {
