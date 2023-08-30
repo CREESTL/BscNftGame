@@ -2,7 +2,7 @@
 
 
 
-
+> Artifact tokens can be aquired during mining        Artifacts are used to craft tools
 
 
 
@@ -13,13 +13,18 @@
 ### addNewArtifact
 
 ```solidity
-function addNewArtifact() external nonpayable
+function addNewArtifact(string newUri) external nonpayable
 ```
 
+See {IArtifacts-addNewArtifact}
 
 
 
+#### Parameters
 
+| Name | Type | Description |
+|---|---|---|
+| newUri | string | undefined |
 
 ### balanceOf
 
@@ -73,7 +78,7 @@ function balanceOfBatch(address[] accounts, uint256[] ids) external view returns
 function getArtifactsTypesAmount() external view returns (uint256)
 ```
 
-
+See {IArtifacts-getArtifactsTypesAmount}
 
 
 
@@ -83,6 +88,23 @@ function getArtifactsTypesAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### getBaseUri
+
+```solidity
+function getBaseUri() external view returns (string)
+```
+
+See {IArtifacts-getBaseUri}
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
 
 ### initialize
 
@@ -131,7 +153,7 @@ function isApprovedForAll(address account, address operator) external view retur
 function lootArtifact(address user, uint256 artifactType) external nonpayable
 ```
 
-
+See {IArtifacts-lootArtifact}
 
 
 
@@ -145,10 +167,10 @@ function lootArtifact(address user, uint256 artifactType) external nonpayable
 ### mint
 
 ```solidity
-function mint(uint256 artifactType, address to, uint256 amount, bytes data) external nonpayable
+function mint(uint256 artifactType, address to, uint256 amount) external nonpayable
 ```
 
-
+See {IArtifacts-mint}
 
 
 
@@ -159,15 +181,14 @@ function mint(uint256 artifactType, address to, uint256 amount, bytes data) exte
 | artifactType | uint256 | undefined |
 | to | address | undefined |
 | amount | uint256 | undefined |
-| data | bytes | undefined |
 
 ### mintBatch
 
 ```solidity
-function mintBatch(address to, uint256[] ids, uint256[] amounts, bytes data) external nonpayable
+function mintBatch(address to, uint256[] artifactTypes, uint256[] amounts) external nonpayable
 ```
 
-
+See {IArtifacts-mintBatch}
 
 
 
@@ -176,9 +197,8 @@ function mintBatch(address to, uint256[] ids, uint256[] amounts, bytes data) ext
 | Name | Type | Description |
 |---|---|---|
 | to | address | undefined |
-| ids | uint256[] | undefined |
+| artifactTypes | uint256[] | undefined |
 | amounts | uint256[] | undefined |
-| data | bytes | undefined |
 
 ### owner
 
@@ -203,7 +223,7 @@ function owner() external view returns (address)
 function pause() external nonpayable
 ```
 
-
+See {IArtifacts-pause}
 
 
 
@@ -233,7 +253,7 @@ function renounceOwnership() external nonpayable
 
 
 
-*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
 ### safeBatchTransferFrom
@@ -293,13 +313,29 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 | operator | address | undefined |
 | approved | bool | undefined |
 
+### setBaseUri
+
+```solidity
+function setBaseUri(string newBaseUri) external nonpayable
+```
+
+See {IArtifacts-setBaseUri}
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newBaseUri | string | undefined |
+
 ### setToolsAddress
 
 ```solidity
 function setToolsAddress(address toolsAddress) external nonpayable
 ```
 
-
+See {IArtifacts-setToolsAddress}
 
 
 
@@ -308,6 +344,23 @@ function setToolsAddress(address toolsAddress) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | toolsAddress | address | undefined |
+
+### setUri
+
+```solidity
+function setUri(uint256 artifactType, string newUri) external nonpayable
+```
+
+See {IArtifacts-setUri}
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| artifactType | uint256 | undefined |
+| newUri | string | undefined |
 
 ### supportsInterface
 
@@ -353,7 +406,7 @@ function transferOwnership(address newOwner) external nonpayable
 function uri(uint256 artifactType) external view returns (string)
 ```
 
-
+See {IArtifacts-uri}
 
 
 
@@ -376,7 +429,7 @@ function uri(uint256 artifactType) external view returns (string)
 ### AddNewArtifact
 
 ```solidity
-event AddNewArtifact(uint256)
+event AddNewArtifact(uint256 artifactType, string newUri)
 ```
 
 
@@ -387,7 +440,8 @@ event AddNewArtifact(uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0  | uint256 | undefined |
+| artifactType  | uint256 | undefined |
+| newUri  | string | undefined |
 
 ### ApprovalForAll
 
@@ -406,6 +460,22 @@ event ApprovalForAll(address indexed account, address indexed operator, bool app
 | account `indexed` | address | undefined |
 | operator `indexed` | address | undefined |
 | approved  | bool | undefined |
+
+### BaseUriChanged
+
+```solidity
+event BaseUriChanged(string newBaseUri)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newBaseUri  | string | undefined |
 
 ### Initialized
 
@@ -528,6 +598,23 @@ event Unpaused(address account)
 | Name | Type | Description |
 |---|---|---|
 | account  | address | undefined |
+
+### UriChanged
+
+```solidity
+event UriChanged(uint256 artifactType, string newUri)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| artifactType  | uint256 | undefined |
+| newUri  | string | undefined |
 
 
 

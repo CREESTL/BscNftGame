@@ -2,7 +2,7 @@
 
 
 
-
+> Interface for Resources contract
 
 
 
@@ -163,6 +163,73 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | owner `indexed` | address | undefined |
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
+
+### GemFeeSent
+
+```solidity
+event GemFeeSent(address to, uint256 bnbSent)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| to  | address | undefined |
+| bnbSent  | uint256 | undefined |
+
+### MinTokensBeforeSwapUpdated
+
+```solidity
+event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| minTokensBeforeSwap  | uint256 | undefined |
+
+### SwapAndLiquify
+
+```solidity
+event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokensSwapped  | uint256 | undefined |
+| ethReceived  | uint256 | undefined |
+| tokensIntoLiqudity  | uint256 | undefined |
+
+### SwapAndLiquifyEnabledUpdated
+
+```solidity
+event SwapAndLiquifyEnabledUpdated(bool enabled)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| enabled  | bool | undefined |
 
 ### Transfer
 
