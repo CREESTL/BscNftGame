@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -11,6 +11,8 @@ import "./interfaces/IBlackList.sol";
 import "./interfaces/IArtifacts.sol";
 import "./interfaces/ITools.sol";
 
+/// @title Artifact tokens can be aquired during mining
+///        Artifacts are used to craft tools
 contract Artifacts is
     Initializable,
     OwnableUpgradeable,
@@ -18,29 +20,25 @@ contract Artifacts is
     IArtifacts,
     PausableUpgradeable
 {
+    /// @dev The address of the Blacklist contract
     IBlackList private _blacklist;
+    /// @dev The address of the Tools contract
     ITools private _tools;
 
+    /// @dev Base URI for IPFS
     string private _baseURI;
+
+    /// @dev Number of types of artifacts
     uint256 private _artifactTypes;
 
-    mapping(uint256 => string) _typesToUris;
+    /// @dev Mapping from artifact type to it's URI
+    mapping(uint256 => string) private _typesToUris;
 
-    event AddNewArtifact(uint256 artifactType, string newUri);
-    event BaseUriChanged(string newBaseUri);
-    event UriChanged(uint256 artifactType, string newUri);
-
+    /// @dev Checks that user is not in blacklist
+    /// @param user The user to check
     modifier ifNotBlacklisted(address user) {
         require(!_blacklist.check(user), "Artifacts: user in blacklist");
         _;
-    }
-
-    function getArtifactsTypesAmount() external view returns (uint256) {
-        return _artifactTypes;
-    }
-
-    function getBaseUri() external view returns (string memory) {
-        return _baseURI;
     }
 
     function initialize(
@@ -57,36 +55,50 @@ contract Artifacts is
         __Pausable_init();
     }
 
+    /// @notice See {IArtifacts-getArtifactsTypesAmount}
+    function getArtifactsTypesAmount() external view returns (uint256) {
+        return _artifactTypes;
+    }
+
+    /// @notice See {IArtifacts-getBaseUri}
+    function getBaseUri() external view returns (string memory) {
+        return _baseURI;
+    }
+
+    /// @notice See {IArtifacts-mint}
     function mint(
         uint256 artifactType,
         address to,
-        uint256 amount,
-        bytes memory data
+        uint256 amount
     ) external onlyOwner whenNotPaused ifNotBlacklisted(to) {
         require(
             artifactType <= _artifactTypes,
             "Artifacts: This artifact doesn't exist"
         );
-        _mint(to, artifactType, amount, data);
+        _mint(to, artifactType, amount, "");
     }
 
+    /// @notice See {IArtifacts-mintBatch}
     function mintBatch(
         address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        uint256[] memory artifactTypes,
+        uint256[] memory amounts
     ) external onlyOwner whenNotPaused ifNotBlacklisted(to) {
-        for (uint256 counter = 0; counter < ids.length; counter++) {
+        for (uint256 counter = 0; counter < artifactTypes.length; counter++) {
             require(
-                ids[counter] <= _artifactTypes,
+                artifactTypes[counter] <= _artifactTypes,
                 "Artifacts: this artifact type doesn't exists"
             );
         }
 
-        _mintBatch(to, ids, amounts, data);
+        _mintBatch(to, artifactTypes, amounts, "");
     }
 
-    function lootArtifact(address user, uint256 artifactType) external {
+    /// @notice See {IArtifacts-lootArtifact}
+    function lootArtifact(
+        address user,
+        uint256 artifactType
+    ) external ifNotBlacklisted(user) {
         require(
             _msgSender() == _tools.getMiningAddress(),
             "Artifacts: only mining contract can call this function"
@@ -94,6 +106,7 @@ contract Artifacts is
         _mint(user, artifactType, 1, "");
     }
 
+    /// @notice See {IArtifacts-pause}
     function pause() external onlyOwner {
         if (!paused()) {
             _pause();
@@ -102,19 +115,23 @@ contract Artifacts is
         }
     }
 
+    /// @notice See {IArtifacts-addNewArtifact}
     function addNewArtifact(string memory newUri) external onlyOwner {
         _addNewArtifact(newUri);
     }
 
+    /// @notice See {IArtifacts-setToolsAddress}
     function setToolsAddress(address toolsAddress) external onlyOwner {
         require(toolsAddress != address(0), "Artifacts: zero address");
         _tools = ITools(toolsAddress);
     }
 
+    /// @notice See {IArtifacts-setBaseUri}
     function setBaseUri(string calldata newBaseUri) external onlyOwner {
         _setBaseUri(newBaseUri);
     }
 
+    /// @notice See {IArtifacts-setUri}
     function setUri(
         uint256 artifactType,
         string calldata newUri
@@ -122,9 +139,15 @@ contract Artifacts is
         _setUri(artifactType, newUri);
     }
 
+    /// @notice See {IArtifacts-uri}
     function uri(
         uint256 artifactType
-    ) public view override returns (string memory) {
+    )
+        public
+        view
+        override(ERC1155Upgradeable, IArtifacts)
+        returns (string memory)
+    {
         require(
             artifactType <= _artifactTypes,
             "Artifacts: This artifact doesn't exist"
@@ -132,9 +155,10 @@ contract Artifacts is
         return _typesToUris[artifactType];
     }
 
+    /// @dev Private implementation of `addNewArtifact`
     function _addNewArtifact(string memory newUri) private {
         _artifactTypes += 1;
-        _tools.increaseArtifactAmount();
+        _tools.increaseArtifactsTypesAmount();
         // New artifact gets URI formed from base URI and uri from parameters
         // Example: ipfs://pinata.cloud/QmYqiEcxH58aTuQha2qxHp6c3zfv5NpNWxAhGQtGpBubwe
         _typesToUris[_artifactTypes] = string(
@@ -143,11 +167,13 @@ contract Artifacts is
         emit AddNewArtifact(_artifactTypes, newUri);
     }
 
+    /// @dev Private implementation of `setBaseUri`
     function _setBaseUri(string calldata newBaseUri) private {
         _baseURI = newBaseUri;
         emit BaseUriChanged(newBaseUri);
     }
 
+    /// @dev Private implementation of `setUri`
     function _setUri(uint256 artifactType, string calldata newUri) private {
         require(
             artifactType <= _artifactTypes,

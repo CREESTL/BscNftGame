@@ -2,7 +2,7 @@
 
 
 
-
+> Contract for resources mining
 
 
 
@@ -16,7 +16,7 @@
 function endMining(uint256 toolId) external nonpayable
 ```
 
-
+See {IMining-endMining}
 
 
 
@@ -25,17 +25,6 @@ function endMining(uint256 toolId) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | toolId | uint256 | undefined |
-
-### getRewards
-
-```solidity
-function getRewards() external nonpayable
-```
-
-
-
-
-
 
 ### initialize
 
@@ -57,54 +46,54 @@ function initialize(address blacklistAddress, address toolsAddress) external non
 ### onERC1155BatchReceived
 
 ```solidity
-function onERC1155BatchReceived(address operator, address from, uint256[] ids, uint256[] values, bytes data) external pure returns (bytes4)
+function onERC1155BatchReceived(address, address, uint256[], uint256[], bytes) external pure returns (bytes4)
 ```
 
 
 
-*Handles the receipt of a multiple ERC1155 token types. This function is called at the end of a `safeBatchTransferFrom` after the balances have been updated. NOTE: To accept the transfer(s), this must return `bytes4(keccak256(&quot;onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)&quot;))` (i.e. 0xbc197c81, or its own function selector).*
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| operator | address | The address which initiated the batch transfer (i.e. msg.sender) |
-| from | address | The address which previously owned the token |
-| ids | uint256[] | An array containing ids of each token being transferred (order and length must match values array) |
-| values | uint256[] | An array containing amounts of each token being transferred (order and length must match ids array) |
-| data | bytes | Additional data with no specified format |
+| _0 | address | undefined |
+| _1 | address | undefined |
+| _2 | uint256[] | undefined |
+| _3 | uint256[] | undefined |
+| _4 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes4 | `bytes4(keccak256(&quot;onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)&quot;))` if transfer is allowed |
+| _0 | bytes4 | undefined |
 
 ### onERC1155Received
 
 ```solidity
-function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes data) external pure returns (bytes4)
+function onERC1155Received(address, address, uint256, uint256, bytes) external pure returns (bytes4)
 ```
 
 
 
-*Handles the receipt of a single ERC1155 token type. This function is called at the end of a `safeTransferFrom` after the balance has been updated. NOTE: To accept the transfer, this must return `bytes4(keccak256(&quot;onERC1155Received(address,address,uint256,uint256,bytes)&quot;))` (i.e. 0xf23a6e61, or its own function selector).*
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| operator | address | The address which initiated the transfer (i.e. msg.sender) |
-| from | address | The address which previously owned the token |
-| id | uint256 | The ID of the token being transferred |
-| value | uint256 | The amount of tokens being transferred |
-| data | bytes | Additional data with no specified format |
+| _0 | address | undefined |
+| _1 | address | undefined |
+| _2 | uint256 | undefined |
+| _3 | uint256 | undefined |
+| _4 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes4 | `bytes4(keccak256(&quot;onERC1155Received(address,address,uint256,uint256,bytes)&quot;))` if transfer is allowed |
+| _0 | bytes4 | undefined |
 
 ### owner
 
@@ -129,7 +118,7 @@ function owner() external view returns (address)
 function pause() external nonpayable
 ```
 
-
+See {IMining-pause}
 
 
 
@@ -159,16 +148,16 @@ function renounceOwnership() external nonpayable
 
 
 
-*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
 ### startMining
 
 ```solidity
-function startMining(uint256 toolId, address user, uint256[] resourcesAmount, uint256[] artifactsAmount) external nonpayable
+function startMining(uint256 toolId, address user, bytes rewards, bytes signature, uint256 nonce) external nonpayable
 ```
 
-
+See {IMining-pause}
 
 
 
@@ -178,8 +167,9 @@ function startMining(uint256 toolId, address user, uint256[] resourcesAmount, ui
 |---|---|---|
 | toolId | uint256 | undefined |
 | user | address | undefined |
-| resourcesAmount | uint256[] | undefined |
-| artifactsAmount | uint256[] | undefined |
+| rewards | bytes | undefined |
+| signature | bytes | undefined |
+| nonce | uint256 | undefined |
 
 ### supportsInterface
 
@@ -189,7 +179,7 @@ function supportsInterface(bytes4 interfaceId) external pure returns (bool)
 
 
 
-*Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.*
+*The following 3 functions are required to ERC1155 standard*
 
 #### Parameters
 
@@ -242,10 +232,10 @@ event Initialized(uint8 version)
 ### MiningEnded
 
 ```solidity
-event MiningEnded(address user, Mining.MiningSession session)
+event MiningEnded(address user, IMining.MiningSession session)
 ```
 
-
+Indicates that mining session has ended
 
 
 
@@ -254,15 +244,15 @@ event MiningEnded(address user, Mining.MiningSession session)
 | Name | Type | Description |
 |---|---|---|
 | user  | address | undefined |
-| session  | Mining.MiningSession | undefined |
+| session  | IMining.MiningSession | undefined |
 
 ### MiningStarted
 
 ```solidity
-event MiningStarted(address user, Mining.MiningSession session)
+event MiningStarted(address user, IMining.MiningSession session)
 ```
 
-
+Indicates that new mining session has started
 
 
 
@@ -271,7 +261,7 @@ event MiningStarted(address user, Mining.MiningSession session)
 | Name | Type | Description |
 |---|---|---|
 | user  | address | undefined |
-| session  | Mining.MiningSession | undefined |
+| session  | IMining.MiningSession | undefined |
 
 ### OwnershipTransferred
 

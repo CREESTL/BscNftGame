@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -7,22 +7,28 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../interfaces/UniswapInterfaces.sol";
+import "./interfaces/UniswapInterfaces.sol";
+import "./interfaces/IGem.sol";
+import "./interfaces/IResources.sol";
 
-interface IGEM {
-    function compensateBnb(address to, uint256 bnbAmount) external;
-}
-
-contract PocMon is Ownable, IERC20 {
+/// @title This contract represents 3 types of resources used to start mining,
+///        buy and craft tools
+/// @dev This token implements the reflection mechanism (RFI).
+///      For more details see: https://reflect-contract-doc.netlify.app/
+contract PocMon is Ownable, IResources {
     using SafeMath for uint256;
     using Address for address;
 
     mapping(address => uint256) private _rOwned;
     mapping(address => uint256) private _tOwned;
+
     mapping(address => mapping(address => uint256)) private _allowances;
+
     mapping(address => bool) private _isExcludedFromFee;
-    mapping(address => bool) private _isExcluded;
+
+    mapping(address => bool) private _isExcludedFromRewards;
     address[] private _excluded;
+
     address public _gemWalletAddress;
     uint256 private constant MAX = ~uint256(0);
     uint256 private _tTotal;
@@ -44,16 +50,8 @@ contract PocMon is Ownable, IERC20 {
     uint256 public _maxTxAmount;
     uint256 public numTokensSellToAddToLiquidity;
 
-    IGEM public compensationToken;
+    IGem public compensationToken;
 
-    event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
-    event SwapAndLiquifyEnabledUpdated(bool enabled);
-    event SwapAndLiquify(
-        uint256 tokensSwapped,
-        uint256 ethReceived,
-        uint256 tokensIntoLiqudity
-    );
-    event GemFeeSent(address to, uint256 bnbSent);
     modifier lockTheSwap() {
         inSwapAndLiquify = true;
         _;
@@ -76,14 +74,12 @@ contract PocMon is Ownable, IERC20 {
         _gemWalletAddress = devAddress;
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(router);
-        // Create a uniswap pair for this new token
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
 
-        // set the rest of the contract variables
         uniswapV2Router = _uniswapV2Router;
 
-        compensationToken = IGEM(compensationToken_);
+        compensationToken = IGem(compensationToken_);
 
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner_] = true;
@@ -101,7 +97,7 @@ contract PocMon is Ownable, IERC20 {
     function isExcludedFromReward(
         address account
     ) external view returns (bool) {
-        return _isExcluded[account];
+        return _isExcludedFromRewards[account];
     }
 
     function isExcludedFromFee(address account) external view returns (bool) {
@@ -209,21 +205,24 @@ contract PocMon is Ownable, IERC20 {
     }
 
     function excludeFromReward(address account) external onlyOwner {
-        require(!_isExcluded[account], "Account is already excluded");
+        require(
+            !_isExcludedFromRewards[account],
+            "Account is already excluded"
+        );
         if (_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
         }
-        _isExcluded[account] = true;
+        _isExcludedFromRewards[account] = true;
         _excluded.push(account);
     }
 
     function includeInReward(address account) external onlyOwner {
-        require(_isExcluded[account], "Account is already included");
+        require(_isExcludedFromRewards[account], "Account is already included");
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
                 _tOwned[account] = 0;
-                _isExcluded[account] = false;
+                _isExcludedFromRewards[account] = false;
                 _excluded.pop();
                 break;
             }
@@ -256,7 +255,6 @@ contract PocMon is Ownable, IERC20 {
         _gemFee = gemFee_;
     }
 
-    // !
     function setLiquidityFeePercent(uint256 liquidityFee_) external onlyOwner {
         require(
             _reflectionFee + liquidityFee_ + _gemFee < 15,
@@ -320,7 +318,7 @@ contract PocMon is Ownable, IERC20 {
     }
 
     function balanceOf(address account) public view override returns (uint256) {
-        if (_isExcluded[account]) return _tOwned[account];
+        if (_isExcludedFromRewards[account]) return _tOwned[account];
         return tokenFromReflection(_rOwned[account]);
     }
 
@@ -456,7 +454,7 @@ contract PocMon is Ownable, IERC20 {
         uint256 currentRate = _getRate();
         uint256 rLiquidity = tLiquidity.mul(currentRate);
         _rOwned[address(this)] = _rOwned[address(this)].add(rLiquidity);
-        if (_isExcluded[address(this)])
+        if (_isExcludedFromRewards[address(this)])
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
 
@@ -521,14 +519,12 @@ contract PocMon is Ownable, IERC20 {
     }
 
     function swapTokensForBnb(uint256 tokenAmount) private {
-        // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
 
         _approve(address(this), address(uniswapV2Router), tokenAmount);
 
-        // make the swap
         try
             uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
                 tokenAmount,
@@ -540,7 +536,6 @@ contract PocMon is Ownable, IERC20 {
         {} catch {}
     }
 
-    // !
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
         uint256 toGemWallet = contractTokenBalance.mul(_gemFee).div(
             _gemFee.add(_liquidityFee)
@@ -589,11 +584,17 @@ contract PocMon is Ownable, IERC20 {
     ) private {
         if (!takeFee) removeAllFee();
 
-        if (_isExcluded[sender] && !_isExcluded[recipient]) {
+        if (
+            _isExcludedFromRewards[sender] && !_isExcludedFromRewards[recipient]
+        ) {
             _transferFromExcluded(sender, recipient, amount);
-        } else if (!_isExcluded[sender] && _isExcluded[recipient]) {
+        } else if (
+            !_isExcludedFromRewards[sender] && _isExcludedFromRewards[recipient]
+        ) {
             _transferToExcluded(sender, recipient, amount);
-        } else if (_isExcluded[sender] && _isExcluded[recipient]) {
+        } else if (
+            _isExcludedFromRewards[sender] && _isExcludedFromRewards[recipient]
+        ) {
             _transferBothExcluded(sender, recipient, amount);
         } else {
             _transferStandard(sender, recipient, amount);

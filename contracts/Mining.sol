@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+pragma solidity 0.8.12;
 
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -12,56 +12,42 @@ import "./interfaces/ITools.sol";
 import "./interfaces/IBlackList.sol";
 import "./interfaces/IResources.sol";
 import "./interfaces/IArtifacts.sol";
+import "./interfaces/IMining.sol";
 
+/// @title Contract for resources mining
 contract Mining is
     Initializable,
+    IMining,
     PausableUpgradeable,
     OwnableUpgradeable,
     IERC1155Receiver
 {
-    ITools private _tools;
-    IBlackList private _blacklist;
-
     using ECDSA for bytes32;
 
-    address private _zeroAddress;
-    // user address => (toolId => MiningSession)
+    /// @dev The address of Tools contract
+    ITools private _tools;
+    /// @dev The address of Blacklist contract
+    IBlackList private _blacklist;
+    /// @dev Zero address to burn tokens
+    address private constant _zeroAddress =
+        0x000000000000000000000000000000000000dEaD;
+
+    /// @dev Mapping (user address => (toolId => MiningSession))
     mapping(address => mapping(uint256 => MiningSession))
         private _usersToSessions;
-    // Show the amount of resources a user would win in specific mining session
-    // user address => (toolId => (resource id => amount))
+    /// @dev Mapping showing the amount of resources a user would win in specific mining session
+    // (user address => (toolId => (resource id => amount)))
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
         private _usersToResources;
-    // Show the amount of artifacts a user would win in specific mining session
-    // user address => (toolId => (artifact type => amount))
+    /// @dev Mapping showing the amount of artifacts a user would win in specific mining session
+    // (user address => (toolId => (artifact type => amount)))
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
         private _usersToArtifacts;
     /// @notice Marks transaction hashes that have been executed already.
     ///         Prevents Replay Attacks
     mapping(bytes32 => bool) private _executed;
 
-    struct MiningSession {
-        uint32 toolId;
-        bool started;
-        bool ended;
-        uint32 endTime;
-        uint32 energyCost;
-        uint16 strengthCost;
-        uint32 nonce;
-    }
-
-    struct Args {
-        uint256 toolId;
-        address user;
-        uint256 nonce;
-        bytes signature;
-        uint256[] resources;
-        uint256[] artifacts;
-    }
-
-    event MiningStarted(address user, MiningSession session);
-    event MiningEnded(address user, MiningSession session);
-
+    /// @dev Checks that user is not blacklisted
     modifier ifNotBlacklisted(address user) {
         require(!_blacklist.check(user), "User in blacklist");
         _;
@@ -71,7 +57,6 @@ contract Mining is
         address blacklistAddress,
         address toolsAddress
     ) external initializer {
-        _zeroAddress = 0x000000000000000000000000000000000000dEaD;
         _tools = ITools(toolsAddress);
         _blacklist = IBlackList(blacklistAddress);
 
@@ -79,6 +64,7 @@ contract Mining is
         __Ownable_init();
     }
 
+    /// @dev The following 3 functions are required to ERC1155 standard
     function supportsInterface(
         bytes4 interfaceId
     ) external pure returns (bool) {
@@ -86,11 +72,11 @@ contract Mining is
     }
 
     function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
     ) external pure override returns (bytes4) {
         return
             bytes4(
@@ -101,11 +87,11 @@ contract Mining is
     }
 
     function onERC1155BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
     ) external pure override returns (bytes4) {
         return
             bytes4(
@@ -115,6 +101,7 @@ contract Mining is
             );
     }
 
+    /// @notice See {IMining-pause}
     function pause() external onlyOwner {
         if (!paused()) {
             _pause();
@@ -123,6 +110,7 @@ contract Mining is
         }
     }
 
+    /// @notice See {IMining-pause}
     function startMining(
         uint256 toolId,
         address user,
@@ -131,8 +119,8 @@ contract Mining is
         uint256 nonce
     ) external whenNotPaused ifNotBlacklisted(user) {
         (
-            uint256[] memory resourcesAmounts,
-            uint256[] memory artifactsAmounts
+            uint256[] memory resourcesAmount,
+            uint256[] memory artifactsAmountss
         ) = abi.decode(rewards, (uint256[], uint256[]));
 
         // Avoid "stack too deep"
@@ -141,8 +129,8 @@ contract Mining is
             user: user,
             nonce: nonce,
             signature: signature,
-            resources: resourcesAmounts,
-            artifacts: artifactsAmounts
+            resources: resourcesAmount,
+            artifacts: artifactsAmountss
         });
 
         require(
@@ -158,8 +146,10 @@ contract Mining is
             args.nonce
         );
 
+        // Prevent signature replay attacks
         require(!_executed[txHash], "Mining: already executed");
 
+        // Make sure that backend has signed the tx
         require(
             _verifyBackendSignature(args.signature, txHash),
             "Mining: invalid backend signature"
@@ -177,11 +167,14 @@ contract Mining is
 
         require(strength - strengthCost > 0, "Mining: not enougth strength");
 
+        // Burn user's Berry tokens.
         IResources resource = IResources(_tools.getResourceAddress(0));
-
-        _tools.safeTransferFrom(args.user, address(this), args.toolId, 1, "");
         resource.transferFrom(args.user, _zeroAddress, energyCost);
 
+        // Transfer user's tool to this contract
+        _tools.safeTransferFrom(args.user, address(this), args.toolId, 1, "");
+
+        // Create a new session
         _usersToSessions[args.user][args.toolId] = MiningSession({
             toolId: uint32(args.toolId),
             started: true,
@@ -191,10 +184,14 @@ contract Mining is
             strengthCost: uint16(strengthCost),
             nonce: uint32(args.nonce)
         });
+
+        // After session has been started, the rewards are assigned to the user
         _setRewards(args.user, args.toolId, args.resources, args.artifacts);
+
         emit MiningStarted(args.user, _usersToSessions[args.user][args.toolId]);
     }
 
+    /// @notice See {IMining-endMining}
     function endMining(
         uint256 toolId
     ) external whenNotPaused ifNotBlacklisted(_msgSender()) {
@@ -225,7 +222,7 @@ contract Mining is
         // Claim all types of resources from this session
         for (
             uint256 toolType = 0;
-            toolType < _tools.getResourceAmount();
+            toolType < _tools.getResourcesTypesAmount();
             toolType++
         ) {
             if (_usersToResources[_msgSender()][toolId][toolType] != 0) {
@@ -280,14 +277,14 @@ contract Mining is
     /// @dev Calculates the hash of parameters of mining function and a nonce
     /// @param toolId The ID of the tool used for mining
     /// @param user The user who started mining
-    /// @param resourcesAmounts The amount of resources to be mined
-    /// @param artifactsAmounts The amount of artifacts to be mined
+    /// @param resourcesAmount The amount of resources to be mined
+    /// @param artifactsAmountss The amount of artifacts to be mined
     /// @param nonce The unique integer
     function _getTxHashMining(
         uint256 toolId,
         address user,
-        uint256[] memory resourcesAmounts,
-        uint256[] memory artifactsAmounts,
+        uint256[] memory resourcesAmount,
+        uint256[] memory artifactsAmountss,
         uint256 nonce
     ) private view returns (bytes32) {
         return
@@ -296,8 +293,8 @@ contract Mining is
                     address(this),
                     toolId,
                     user,
-                    resourcesAmounts,
-                    artifactsAmounts,
+                    resourcesAmount,
+                    artifactsAmountss,
                     nonce
                 )
             );
@@ -307,23 +304,19 @@ contract Mining is
     /// @param user The user to assign rewards to
     /// @param toolId The ID of the tool used in the session
     ///        a unique tool is used in each session
-    /// @param resourcesAmounts Array of amounts of each type of resource that
+    /// @param resourcesAmount Array of amounts of each type of resource that
     ///        can be claimed after mining
-    /// @param artifactsAmounts Array of amounts of each type of artifact that
+    /// @param artifactsAmountss Array of amounts of each type of artifact that
     ///        can be claimed after mining
     function _setRewards(
         address user,
         uint256 toolId,
-        uint256[] memory resourcesAmounts,
-        uint256[] memory artifactsAmounts
+        uint256[] memory resourcesAmount,
+        uint256[] memory artifactsAmountss
     ) private {
-        for (
-            uint256 counter = 0;
-            counter < resourcesAmounts.length;
-            counter++
-        ) {
-            if (resourcesAmounts[counter] != 0) {
-                _usersToResources[user][toolId][counter] += resourcesAmounts[
+        for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
+            if (resourcesAmount[counter] != 0) {
+                _usersToResources[user][toolId][counter] += resourcesAmount[
                     counter
                 ];
             }
@@ -333,10 +326,10 @@ contract Mining is
             counter < _tools.getArtifactsTypesAmount();
             counter++
         ) {
-            if (artifactsAmounts[counter] != 0) {
+            if (artifactsAmountss[counter] != 0) {
                 _usersToArtifacts[user][toolId][
                     counter + 1
-                ] += artifactsAmounts[counter];
+                ] += artifactsAmountss[counter];
             }
         }
     }

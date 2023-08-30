@@ -2,7 +2,7 @@
 
 
 
-
+> Gem token contract
 
 
 
@@ -84,7 +84,7 @@ function balanceOf(address account) external view returns (uint256)
 function blockAddress(address addr, bool isBlocked) external nonpayable
 ```
 
-
+See {IGem-blockAddress}
 
 
 
@@ -101,7 +101,7 @@ function blockAddress(address addr, bool isBlocked) external nonpayable
 function blocked(address) external view returns (bool)
 ```
 
-
+Addresses from this list cannot transfer of receive tokens
 
 
 
@@ -123,7 +123,7 @@ function blocked(address) external view returns (bool)
 function compensateBnb(address to, uint256 bnbAmount) external nonpayable
 ```
 
-
+See {IGem-compensateBnb}
 
 
 
@@ -140,7 +140,7 @@ function compensateBnb(address to, uint256 bnbAmount) external nonpayable
 function compensationRate() external view returns (uint256)
 ```
 
-
+The BNB/GEM rate of compensation
 
 
 
@@ -157,7 +157,7 @@ function compensationRate() external view returns (uint256)
 function compensator() external view returns (address)
 ```
 
-
+The address of the contract that can compensate fees with Gems
 
 
 
@@ -174,9 +174,9 @@ function compensator() external view returns (address)
 function decimals() external pure returns (uint8)
 ```
 
+See {IGem-decimals}
 
 
-*Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}.*
 
 
 #### Returns
@@ -282,7 +282,7 @@ function renounceOwnership() external nonpayable
 function setCompensationRate(uint256 compensationRate_) external nonpayable
 ```
 
-
+See {IGem-setCompensationRate}
 
 
 
@@ -298,7 +298,7 @@ function setCompensationRate(uint256 compensationRate_) external nonpayable
 function setCompensator(address compensator_) external nonpayable
 ```
 
-
+See {IGem-setCompensator}
 
 
 
@@ -427,6 +427,22 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
 
+### Blocked
+
+```solidity
+event Blocked(address addr)
+```
+
+Indicates that address has been blocked from transferring and receiving tokens
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| addr  | address | undefined |
+
 ### OwnershipTransferred
 
 ```solidity
@@ -461,6 +477,22 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 | from `indexed` | address | undefined |
 | to `indexed` | address | undefined |
 | value  | uint256 | undefined |
+
+### Unblocked
+
+```solidity
+event Unblocked(address addr)
+```
+
+Indicates that address has been unblocked from transferring and receiving tokens
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| addr  | address | undefined |
 
 
 

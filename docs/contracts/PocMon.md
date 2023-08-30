@@ -2,11 +2,11 @@
 
 
 
+> This contract represents 3 types of resources used to start mining,        buy and craft tools
 
 
 
-
-
+*This token implements the reflection mechanism (RFI).      For more details see: https://reflect-contract-doc.netlify.app/*
 
 ## Methods
 
@@ -166,7 +166,7 @@ function balanceOf(address account) external view returns (uint256)
 ### compensationToken
 
 ```solidity
-function compensationToken() external view returns (contract IGEM)
+function compensationToken() external view returns (contract IGem)
 ```
 
 
@@ -178,7 +178,7 @@ function compensationToken() external view returns (contract IGEM)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IGEM | undefined |
+| _0 | contract IGem | undefined |
 
 ### decimals
 

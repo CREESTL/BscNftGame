@@ -2,7 +2,7 @@
 
 
 
-
+> This contracts represents tools that are used to mine resources and artifacts.
 
 
 
@@ -13,10 +13,10 @@
 ### addTool
 
 ```solidity
-function addTool(uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmount, string newURI) external nonpayable returns (uint256)
+function addTool(uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmounts, string newURI) external nonpayable returns (uint256)
 ```
 
-
+See {ITools-addTool}
 
 
 
@@ -29,7 +29,7 @@ function addTool(uint32 maxStrength, uint32 miningDuration, uint32 energyCost, u
 | energyCost | uint32 | undefined |
 | strengthCost | uint32 | undefined |
 | resourcesAmount | uint256 | undefined |
-| artifactsAmount | uint256[] | undefined |
+| artifactsAmounts | uint256[] | undefined |
 | newURI | string | undefined |
 
 #### Returns
@@ -90,7 +90,7 @@ function balanceOfBatch(address[] accounts, uint256[] ids) external view returns
 function corrupt(address user, uint256 toolId, uint256 strengthCost) external nonpayable
 ```
 
-
+See {ITools-corrupt}
 
 
 
@@ -108,7 +108,7 @@ function corrupt(address user, uint256 toolId, uint256 strengthCost) external no
 function craft(uint256 toolType) external nonpayable
 ```
 
-
+See {ITools-craft}
 
 
 
@@ -124,7 +124,7 @@ function craft(uint256 toolType) external nonpayable
 function getArtifactsAddress() external view returns (address)
 ```
 
-
+See {ITools-getArtifactsAddress}
 
 
 
@@ -141,7 +141,7 @@ function getArtifactsAddress() external view returns (address)
 function getArtifactsTypesAmount() external view returns (uint256)
 ```
 
-
+See {ITools-getArtifactsTypesAmount}
 
 
 
@@ -158,7 +158,7 @@ function getArtifactsTypesAmount() external view returns (uint256)
 function getMiningAddress() external view returns (address)
 ```
 
-
+See {ITools-getMiningAddress}
 
 
 
@@ -172,10 +172,10 @@ function getMiningAddress() external view returns (address)
 ### getRecipe
 
 ```solidity
-function getRecipe(uint256 toolType) external view returns (uint256 resourcesAmount, uint256[] artifactsAmount)
+function getRecipe(uint256 toolType) external view returns (uint256 resourcesAmount, uint256[] artifactsAmounts)
 ```
 
-
+See {ITools-getRecipe}
 
 
 
@@ -190,7 +190,7 @@ function getRecipe(uint256 toolType) external view returns (uint256 resourcesAmo
 | Name | Type | Description |
 |---|---|---|
 | resourcesAmount | uint256 | undefined |
-| artifactsAmount | uint256[] | undefined |
+| artifactsAmounts | uint256[] | undefined |
 
 ### getResourceAddress
 
@@ -198,7 +198,7 @@ function getRecipe(uint256 toolType) external view returns (uint256 resourcesAmo
 function getResourceAddress(uint256 resourceId) external view returns (address)
 ```
 
-
+See {ITools-getResourceAddress}
 
 
 
@@ -214,13 +214,13 @@ function getResourceAddress(uint256 resourceId) external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### getResourceAmount
+### getResourcesTypesAmount
 
 ```solidity
-function getResourceAmount() external view returns (uint256)
+function getResourcesTypesAmount() external view returns (uint256)
 ```
 
-
+See {ITools-getResourcesTypesAmount}
 
 
 
@@ -237,7 +237,7 @@ function getResourceAmount() external view returns (uint256)
 function getStrength(uint256 toolId) external view returns (uint256)
 ```
 
-
+See {ITools-getStrength}
 
 
 
@@ -259,7 +259,7 @@ function getStrength(uint256 toolId) external view returns (uint256)
 function getToolProperties(address user, uint256 toolId) external view returns (uint256 toolType, uint256 strength, uint256 strengthCost, uint256 miningDuration, uint256 energyCost)
 ```
 
-
+See {ITools-getToolProperties}
 
 
 
@@ -286,7 +286,7 @@ function getToolProperties(address user, uint256 toolId) external view returns (
 function getToolTypeProperties(uint256 toolType) external view returns (uint256 maxStrength, uint256 strengthCost, uint256 miningDuration, uint256 energyCost)
 ```
 
-
+See {ITools-getToolTypeProperties}
 
 
 
@@ -311,7 +311,7 @@ function getToolTypeProperties(uint256 toolType) external view returns (uint256 
 function getToolsTypesAmount() external view returns (uint256)
 ```
 
-
+See {ITools-getToolsTypesAmount}
 
 
 
@@ -322,13 +322,13 @@ function getToolsTypesAmount() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### increaseArtifactAmount
+### increaseArtifactsTypesAmount
 
 ```solidity
-function increaseArtifactAmount() external nonpayable
+function increaseArtifactsTypesAmount() external nonpayable
 ```
 
-
+See {ITools-increaseArtifactsTypesAmount}
 
 
 
@@ -382,7 +382,7 @@ function isApprovedForAll(address account, address operator) external view retur
 function mint(address to, uint128 toolType, uint256 amount) external nonpayable
 ```
 
-
+See {ITools-mint}
 
 
 
@@ -397,10 +397,10 @@ function mint(address to, uint128 toolType, uint256 amount) external nonpayable
 ### mintBatch
 
 ```solidity
-function mintBatch(address to, uint256[] toolTypes, uint256[] amounts, bytes data) external nonpayable
+function mintBatch(address to, uint256[] toolTypes, uint256[] amounts) external nonpayable
 ```
 
-
+See {ITools-mintBatch}
 
 
 
@@ -411,59 +411,58 @@ function mintBatch(address to, uint256[] toolTypes, uint256[] amounts, bytes dat
 | to | address | undefined |
 | toolTypes | uint256[] | undefined |
 | amounts | uint256[] | undefined |
-| data | bytes | undefined |
 
 ### onERC1155BatchReceived
 
 ```solidity
-function onERC1155BatchReceived(address operator, address from, uint256[] ids, uint256[] values, bytes data) external pure returns (bytes4)
+function onERC1155BatchReceived(address, address, uint256[], uint256[], bytes) external pure returns (bytes4)
 ```
 
 
 
-*Handles the receipt of a multiple ERC1155 token types. This function is called at the end of a `safeBatchTransferFrom` after the balances have been updated. NOTE: To accept the transfer(s), this must return `bytes4(keccak256(&quot;onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)&quot;))` (i.e. 0xbc197c81, or its own function selector).*
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| operator | address | The address which initiated the batch transfer (i.e. msg.sender) |
-| from | address | The address which previously owned the token |
-| ids | uint256[] | An array containing ids of each token being transferred (order and length must match values array) |
-| values | uint256[] | An array containing amounts of each token being transferred (order and length must match ids array) |
-| data | bytes | Additional data with no specified format |
+| _0 | address | undefined |
+| _1 | address | undefined |
+| _2 | uint256[] | undefined |
+| _3 | uint256[] | undefined |
+| _4 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes4 | `bytes4(keccak256(&quot;onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)&quot;))` if transfer is allowed |
+| _0 | bytes4 | undefined |
 
 ### onERC1155Received
 
 ```solidity
-function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes data) external pure returns (bytes4)
+function onERC1155Received(address, address, uint256, uint256, bytes) external pure returns (bytes4)
 ```
 
 
 
-*Handles the receipt of a single ERC1155 token type. This function is called at the end of a `safeTransferFrom` after the balance has been updated. NOTE: To accept the transfer, this must return `bytes4(keccak256(&quot;onERC1155Received(address,address,uint256,uint256,bytes)&quot;))` (i.e. 0xf23a6e61, or its own function selector).*
+*The next 2 functions are required for ERC1155 standard*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| operator | address | The address which initiated the transfer (i.e. msg.sender) |
-| from | address | The address which previously owned the token |
-| id | uint256 | The ID of the token being transferred |
-| value | uint256 | The amount of tokens being transferred |
-| data | bytes | Additional data with no specified format |
+| _0 | address | undefined |
+| _1 | address | undefined |
+| _2 | uint256 | undefined |
+| _3 | uint256 | undefined |
+| _4 | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes4 | `bytes4(keccak256(&quot;onERC1155Received(address,address,uint256,uint256,bytes)&quot;))` if transfer is allowed |
+| _0 | bytes4 | undefined |
 
 ### owner
 
@@ -488,7 +487,7 @@ function owner() external view returns (address)
 function pause() external nonpayable
 ```
 
-
+See {ITools-pause}
 
 
 
@@ -518,7 +517,7 @@ function renounceOwnership() external nonpayable
 
 
 
-*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
 ### repairTool
@@ -527,7 +526,7 @@ function renounceOwnership() external nonpayable
 function repairTool(uint256 toolId) external nonpayable
 ```
 
-
+See {ITools-repairTool}
 
 
 
@@ -543,7 +542,7 @@ function repairTool(uint256 toolId) external nonpayable
 function safeBatchTransferFrom(address from, address to, uint256[] toolIds, uint256[] amounts, bytes data) external nonpayable
 ```
 
-
+See {ITools-safeBatchTransferFrom}
 
 
 
@@ -563,7 +562,7 @@ function safeBatchTransferFrom(address from, address to, uint256[] toolIds, uint
 function safeTransferFrom(address from, address to, uint256 toolId, uint256 amount, bytes data) external nonpayable
 ```
 
-
+See {ITools-safeTransferFrom}
 
 
 
@@ -600,7 +599,7 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 function setArtifactsAddress(address artifactsAddress) external nonpayable
 ```
 
-
+See {ITools-setArtifactsAddress}
 
 
 
@@ -616,7 +615,7 @@ function setArtifactsAddress(address artifactsAddress) external nonpayable
 function setBaseURI(string baseURI) external nonpayable
 ```
 
-
+See {ITools-setBaseURI}
 
 
 
@@ -632,7 +631,7 @@ function setBaseURI(string baseURI) external nonpayable
 function setMiningAddress(address miningAddress) external nonpayable
 ```
 
-
+See {ITools-setMiningAddress}
 
 
 
@@ -645,10 +644,10 @@ function setMiningAddress(address miningAddress) external nonpayable
 ### setRecipe
 
 ```solidity
-function setRecipe(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmount) external nonpayable
+function setRecipe(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmounts) external nonpayable
 ```
 
-
+See {ITools-setRecipe}
 
 
 
@@ -658,7 +657,7 @@ function setRecipe(uint256 toolType, uint256 resourcesAmount, uint256[] artifact
 |---|---|---|
 | toolType | uint256 | undefined |
 | resourcesAmount | uint256 | undefined |
-| artifactsAmount | uint256[] | undefined |
+| artifactsAmounts | uint256[] | undefined |
 
 ### setToolProperties
 
@@ -666,7 +665,7 @@ function setRecipe(uint256 toolType, uint256 resourcesAmount, uint256[] artifact
 function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost) external nonpayable
 ```
 
-
+See {ITools-setToolProperties}
 
 
 
@@ -686,7 +685,7 @@ function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDu
 function setURI(uint256 toolType, string newURI) external nonpayable
 ```
 
-
+See {ITools-setURI}
 
 
 
@@ -705,7 +704,7 @@ function supportsInterface(bytes4 interfaceId) external view returns (bool)
 
 
 
-
+*This function is required for ERC1155 standard*
 
 #### Parameters
 
@@ -741,7 +740,7 @@ function transferOwnership(address newOwner) external nonpayable
 function uri(uint256 toolType) external view returns (string)
 ```
 
-
+See {ITools-uri}
 
 
 
@@ -764,10 +763,10 @@ function uri(uint256 toolType) external view returns (string)
 ### AddTool
 
 ```solidity
-event AddTool(uint256 toolType)
+event AddTool(uint256 toolType, string newURI)
 ```
 
-
+Indicates that a new tool was added
 
 
 
@@ -776,6 +775,7 @@ event AddTool(uint256 toolType)
 | Name | Type | Description |
 |---|---|---|
 | toolType  | uint256 | undefined |
+| newURI  | string | undefined |
 
 ### ApprovalForAll
 
@@ -801,7 +801,7 @@ event ApprovalForAll(address indexed account, address indexed operator, bool app
 event BaseURI(string baseURI)
 ```
 
-
+Indicates that a new base URI was set
 
 
 
@@ -814,10 +814,10 @@ event BaseURI(string baseURI)
 ### Craft
 
 ```solidity
-event Craft(address user, uint256)
+event Craft(address user, uint256 toolType, uint256 toolId)
 ```
 
-
+Indicates that a tool was crafted
 
 
 
@@ -826,7 +826,8 @@ event Craft(address user, uint256)
 | Name | Type | Description |
 |---|---|---|
 | user  | address | undefined |
-| _1  | uint256 | undefined |
+| toolType  | uint256 | undefined |
+| toolId  | uint256 | undefined |
 
 ### Initialized
 
@@ -843,6 +844,42 @@ event Initialized(uint8 version)
 | Name | Type | Description |
 |---|---|---|
 | version  | uint8 | undefined |
+
+### MintId
+
+```solidity
+event MintId(address to, uint256 toolType, uint256 toolId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| to  | address | undefined |
+| toolType  | uint256 | undefined |
+| toolId  | uint256 | undefined |
+
+### MintType
+
+```solidity
+event MintType(address to, uint256 toolType, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| to  | address | undefined |
+| toolType  | uint256 | undefined |
+| amount  | uint256 | undefined |
 
 ### OwnershipTransferred
 
@@ -880,10 +917,10 @@ event Paused(address account)
 ### RecipeCreatedOrUpdated
 
 ```solidity
-event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmount)
+event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[] artifactsAmounts)
 ```
 
-
+Indicates that tool recipe was created or updated
 
 
 
@@ -893,7 +930,7 @@ event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[
 |---|---|---|
 | toolType  | uint256 | undefined |
 | resourcesAmount  | uint256 | undefined |
-| artifactsAmount  | uint256[] | undefined |
+| artifactsAmounts  | uint256[] | undefined |
 
 ### ToolPropertiesSet
 
@@ -901,7 +938,7 @@ event RecipeCreatedOrUpdated(uint256 toolType, uint256 resourcesAmount, uint256[
 event ToolPropertiesSet(uint256 toolType)
 ```
 
-
+Indicates that tool type&#39;s properties have been changed
 
 
 
@@ -917,6 +954,22 @@ event ToolPropertiesSet(uint256 toolType)
 event ToolRepaired(uint256 toolId)
 ```
 
+Indicates that a tool has been fully repaired
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| toolId  | uint256 | undefined |
+
+### Transfer
+
+```solidity
+event Transfer(address from, address to, uint256 toolType, uint256 toolId)
+```
+
 
 
 
@@ -925,6 +978,9 @@ event ToolRepaired(uint256 toolId)
 
 | Name | Type | Description |
 |---|---|---|
+| from  | address | undefined |
+| to  | address | undefined |
+| toolType  | uint256 | undefined |
 | toolId  | uint256 | undefined |
 
 ### TransferBatch

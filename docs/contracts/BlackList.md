@@ -2,7 +2,7 @@
 
 
 
-
+> Blacklist contract. Blacklisted addresses cannot use main functions        of other contracts
 
 
 
@@ -16,7 +16,7 @@
 function addToBlacklist(address user) external nonpayable
 ```
 
-
+See {IBlacklist-addToBlacklist}
 
 
 
@@ -32,7 +32,7 @@ function addToBlacklist(address user) external nonpayable
 function check(address user) external view returns (bool)
 ```
 
-
+See {IBlacklist-check}
 
 
 
@@ -71,7 +71,7 @@ function owner() external view returns (address)
 function removeFromBlacklist(address user) external nonpayable
 ```
 
-
+See {IBlacklist-removeFromBlacklist}
 
 
 
@@ -112,6 +112,22 @@ function transferOwnership(address newOwner) external nonpayable
 
 ## Events
 
+### AddedToBlacklist
+
+```solidity
+event AddedToBlacklist(address user)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user  | address | undefined |
+
 ### OwnershipTransferred
 
 ```solidity
@@ -128,6 +144,22 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### RemovedFromBlacklist
+
+```solidity
+event RemovedFromBlacklist(address user)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user  | address | undefined |
 
 
 
