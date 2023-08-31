@@ -120,7 +120,7 @@ contract Mining is
     ) external whenNotPaused ifNotBlacklisted(user) {
         (
             uint256[] memory resourcesAmount,
-            uint256[] memory artifactsAmountss
+            uint256[] memory artifactsAmounts
         ) = abi.decode(rewards, (uint256[], uint256[]));
 
         // Avoid "stack too deep"
@@ -130,7 +130,7 @@ contract Mining is
             nonce: nonce,
             signature: signature,
             resources: resourcesAmount,
-            artifacts: artifactsAmountss
+            artifacts: artifactsAmounts
         });
 
         require(
@@ -278,13 +278,13 @@ contract Mining is
     /// @param toolId The ID of the tool used for mining
     /// @param user The user who started mining
     /// @param resourcesAmount The amount of resources to be mined
-    /// @param artifactsAmountss The amount of artifacts to be mined
+    /// @param artifactsAmounts The amount of artifacts to be mined
     /// @param nonce The unique integer
     function _getTxHashMining(
         uint256 toolId,
         address user,
         uint256[] memory resourcesAmount,
-        uint256[] memory artifactsAmountss,
+        uint256[] memory artifactsAmounts,
         uint256 nonce
     ) private view returns (bytes32) {
         return
@@ -294,7 +294,7 @@ contract Mining is
                     toolId,
                     user,
                     resourcesAmount,
-                    artifactsAmountss,
+                    artifactsAmounts,
                     nonce
                 )
             );
@@ -306,13 +306,13 @@ contract Mining is
     ///        a unique tool is used in each session
     /// @param resourcesAmount Array of amounts of each type of resource that
     ///        can be claimed after mining
-    /// @param artifactsAmountss Array of amounts of each type of artifact that
+    /// @param artifactsAmounts Array of amounts of each type of artifact that
     ///        can be claimed after mining
     function _setRewards(
         address user,
         uint256 toolId,
         uint256[] memory resourcesAmount,
-        uint256[] memory artifactsAmountss
+        uint256[] memory artifactsAmounts
     ) private {
         for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
             if (resourcesAmount[counter] != 0) {
@@ -326,10 +326,10 @@ contract Mining is
             counter < _tools.getArtifactsTypesAmount();
             counter++
         ) {
-            if (artifactsAmountss[counter] != 0) {
+            if (artifactsAmounts[counter] != 0) {
                 _usersToArtifacts[user][toolId][
                     counter + 1
-                ] += artifactsAmountss[counter];
+                ] += artifactsAmounts[counter];
             }
         }
     }
