@@ -218,6 +218,10 @@ contract Mining is
 
         IResources resource;
         IArtifacts artifacts;
+        
+        uint256[] memory claimedResources;
+        uint256[] memory claimedArtifacts;
+        
 
         // Claim all types of resources from this session
         for (
@@ -233,6 +237,8 @@ contract Mining is
                 );
                 delete _usersToResources[_msgSender()][toolId][toolType];
             }
+            // Mark that user has claimed some amount of resources. Even if it's zero.
+            claimedResources[toolType] = _usersToResources[_msgSender()][toolId][toolType];
         }
 
         // Claim all types of artifacts from this session
@@ -250,10 +256,18 @@ contract Mining is
                 ) {
                     // Mint new artifact a required number of times
                     artifacts.lootArtifact(_msgSender(), artifactType);
+                    // When looting, 1 artifact is minted
+                    claimedArtifacts[artifactType] = 1;
                 }
                 delete _usersToArtifacts[_msgSender()][toolId][artifactType];
+            } else {
+                // No artifacts were looted
+                claimedArtifacts[artifactType] = 0;
+                
             }
         }
+        
+        emit RewardsClaimed(_msgSender(), claimedResources, claimedArtifacts);
 
         // Delete the session
         delete _usersToSessions[_msgSender()][toolId];
