@@ -524,12 +524,6 @@ contract Tools is
         uint256 toolType = _ownedTools[from][toolId].toolType;
         require(toolType > 0, "Tools: tool doesn't exist");
 
-        require(
-            _ownedTools[from][toolId].strength ==
-                _typesToTools[toolType].maxStrength,
-            "Tools: tool is not fully repaired"
-        );
-
         super.safeTransferFrom(from, to, toolType, amount, data);
         emit Transfer(from, to, toolType, toolId);
         _ownedTools[to][toolId] = _ownedTools[from][toolId];
