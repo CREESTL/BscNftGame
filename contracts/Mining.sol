@@ -219,8 +219,8 @@ contract Mining is
         IResources resource;
         IArtifacts artifacts;
         
-        uint256[] memory claimedResources;
-        uint256[] memory claimedArtifacts;
+        uint256[] memory claimedResources = new uint256[](_tools.getResourcesTypesAmount());
+        uint256[] memory claimedArtifacts = new uint256[](_tools.getArtifactsTypesAmount());
         
 
         // Claim all types of resources from this session
