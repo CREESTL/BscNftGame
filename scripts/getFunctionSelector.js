@@ -27,7 +27,8 @@ function main() {
     "getArtifactsTypesAmount()",
     "getArtifactsAddress()",
     "endMining(uint256)",
-    "check(address)"
+    "check(address)",
+    "getMiningAddress()",
   ]
   for (let i = 0; i < signatures.length; i++) {
     let signature = signatures[i];
