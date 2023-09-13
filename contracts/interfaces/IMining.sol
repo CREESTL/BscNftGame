@@ -30,7 +30,11 @@ interface IMining {
     /// @notice Indicates that mining session has ended
     event MiningEnded(address user, MiningSession session);
     /// @notice Indicates that user has claimed his rewards
-    event RewardsClaimed(address user, uint256[] resources, uint256[] artifacts);
+    event RewardsClaimed(
+        address user,
+        uint256[] resources,
+        uint256[] artifacts
+    );
 
     /// @notice Pauses contract if it's active. Activates it if it's paused
     function pause() external;

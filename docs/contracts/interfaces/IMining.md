@@ -95,5 +95,23 @@ Indicates that new mining session has started
 | user  | address | undefined |
 | session  | IMining.MiningSession | undefined |
 
+### RewardsClaimed
+
+```solidity
+event RewardsClaimed(address user, uint256[] resources, uint256[] artifacts)
+```
+
+Indicates that user has claimed his rewards
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user  | address | undefined |
+| resources  | uint256[] | undefined |
+| artifacts  | uint256[] | undefined |
+
 
 

@@ -218,10 +218,13 @@ contract Mining is
 
         IResources resource;
         IArtifacts artifacts;
-        
-        uint256[] memory claimedResources = new uint256[](_tools.getResourcesTypesAmount());
-        uint256[] memory claimedArtifacts = new uint256[](_tools.getArtifactsTypesAmount());
-        
+
+        uint256[] memory claimedResources = new uint256[](
+            _tools.getResourcesTypesAmount()
+        );
+        uint256[] memory claimedArtifacts = new uint256[](
+            _tools.getArtifactsTypesAmount()
+        );
 
         // Claim all types of resources from this session
         for (
@@ -238,7 +241,9 @@ contract Mining is
                 delete _usersToResources[_msgSender()][toolId][toolType];
             }
             // Mark that user has claimed some amount of resources. Even if it's zero.
-            claimedResources[toolType] = _usersToResources[_msgSender()][toolId][toolType];
+            claimedResources[toolType] = _usersToResources[_msgSender()][
+                toolId
+            ][toolType];
         }
 
         // Claim all types of artifacts from this session
@@ -263,10 +268,9 @@ contract Mining is
             } else {
                 // No artifacts were looted
                 claimedArtifacts[artifactType] = 0;
-                
             }
         }
-        
+
         emit RewardsClaimed(_msgSender(), claimedResources, claimedArtifacts);
 
         // Delete the session
