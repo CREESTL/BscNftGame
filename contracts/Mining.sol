@@ -243,15 +243,15 @@ contract Mining is
 
         // Claim all types of artifacts from this session
         for (
-            uint256 artifactType = 1;
-            artifactType <= _tools.getArtifactsTypesAmount();
+            uint256 artifactType = 0;
+            artifactType < _tools.getArtifactsTypesAmount();
             artifactType++
         ) {
             if (_usersToArtifacts[_msgSender()][toolId][artifactType] != 0) {
                 artifacts = IArtifacts(_tools.getArtifactsAddress());
                 for (
-                    uint256 i = 1;
-                    i <= _usersToArtifacts[_msgSender()][toolId][artifactType];
+                    uint256 i = 0;
+                    i < _usersToArtifacts[_msgSender()][toolId][artifactType];
                     i++
                 ) {
                     // Mint new artifact a required number of times
