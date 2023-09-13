@@ -26,14 +26,16 @@ let artifactURIs = [
 async function main() {
   console.log(`[NOTICE!] Chain of deployment: ${network.name}`);
 
-  // ====================================================
+  [ownerAcc] = await ethers.getSigners();
 
+  // ====================================================
+  
   // Contract #1: Gem
 
   contractName = "Gem";
   console.log(`[${contractName}]: Start of Deployment...`);
   let gemFactory = await ethers.getContractFactory(contractName);
-  const gem = await gemFactory.deploy(1);
+  const gem = await gemFactory.connect(ownerAcc).deploy(1);
   await gem.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = gem.address;
@@ -68,7 +70,7 @@ async function main() {
   contractName = "Berry";
   console.log(`[${contractName}]: Start of Deployment...`);
   let berryFactory = await ethers.getContractFactory("PocMon");
-  const berry = await berryFactory.deploy(
+  const berry = await berryFactory.connect(ownerAcc).deploy(
     PANCAKE_ROUTER_ADDRESS,
     gem.address,
     ACC_ADDRESS,
@@ -113,7 +115,7 @@ async function main() {
   contractName = "Tree";
   console.log(`[${contractName}]: Start of Deployment...`);
   let treeFactory = await ethers.getContractFactory("PocMon");
-  const tree = await treeFactory.deploy(
+  const tree = await treeFactory.connect(ownerAcc).deploy(
     PANCAKE_ROUTER_ADDRESS,
     gem.address,
     ACC_ADDRESS,
@@ -158,7 +160,7 @@ async function main() {
   contractName = "Gold";
   console.log(`[${contractName}]: Start of Deployment...`);
   let goldFactory = await ethers.getContractFactory("PocMon");
-  const gold = await goldFactory.deploy(
+  const gold = await goldFactory.connect(ownerAcc).deploy(
     PANCAKE_ROUTER_ADDRESS,
     gem.address,
     ACC_ADDRESS,
@@ -203,7 +205,7 @@ async function main() {
   contractName = "BlackList";
   console.log(`[${contractName}]: Start of Deployment...`);
   let blackListFactory = await ethers.getContractFactory(contractName);
-  const blacklist = await blackListFactory.deploy();
+  const blacklist = await blackListFactory.connect(ownerAcc).deploy();
   await blacklist.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = blacklist.address;
@@ -239,6 +241,7 @@ async function main() {
   contractName = "Tools";
   console.log(`[${contractName}]: Start of Deployment...`);
   let toolsFactory = await ethers.getContractFactory(contractName);
+  await toolsFactory.connect(ownerAcc);
   const tools = await upgrades.deployProxy(toolsFactory, [
     blacklist.address,
     berry.address,
@@ -283,6 +286,7 @@ async function main() {
   contractName = "Artifacts";
   console.log(`[${contractName}]: Start of Deployment...`);
   let artifactsFactory = await ethers.getContractFactory(contractName);
+  await artifactsFactory.connect(ownerAcc);
   const artifacts = await upgrades.deployProxy(artifactsFactory, [
     tools.address,
     BASE_URI,
@@ -325,6 +329,7 @@ async function main() {
   contractName = "Mining";
   console.log(`[${contractName}]: Start of Deployment...`);
   let miningFactory = await ethers.getContractFactory(contractName);
+  await miningFactory.connect(ownerAcc);
   const mining = await upgrades.deployProxy(miningFactory, [
     blacklist.address,
     tools.address,
@@ -360,12 +365,23 @@ async function main() {
 
   // ====================================================
 
-  console.log(`[Tools][Proxy]: Adding 6 initial artifacts...`);
-
   await tools.setArtifactsAddress(artifacts.address);
   await tools.setMiningAddress(mining.address);
 
-  await delay(90000);
+  await delay(190000);
+
+  console.log(`[Tools][Proxy]: Adding 6 initial artifacts...`);
+
+  
+  if (await tools.getArtifactsAddress() != artifacts.address) {
+    console.log("Artifacts address was not set!");
+    process.exit(1);
+  }
+
+  if (await tools.getMiningAddress() != mining.address) {
+    console.log("Mining address was not set!");
+    process.exit(1);
+  }
 
   // Add first 6 artifacts
   for (let i = 0; i < artifactURIs.length; i++) {
@@ -378,7 +394,15 @@ async function main() {
   let totalSupply = await berry.totalSupply();
   let transferAmount = totalSupply.mul(9900).div(10000);
 
-  [ownerAcc] = await ethers.getSigners();
+  if (
+    ownerAcc.address != await berry.owner() ||
+    ownerAcc.address != await tree.owner() ||
+    ownerAcc.address != await gold.owner()
+  ) {
+    console.log("Invalid owner of resources");
+    console.log("The real owner is: ", await berry.owner());
+    process.exit(1);
+  }
 
   console.log("[Berry]: Transferring 99% of total supply to Mining");
   await berry.connect(ownerAcc).transfer(mining.address, transferAmount);
