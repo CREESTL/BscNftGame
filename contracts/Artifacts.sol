@@ -29,6 +29,7 @@ contract Artifacts is
     string private _baseURI;
 
     /// @dev Number of types of artifacts
+    /// @dev Starts with 0
     uint256 private _artifactTypes;
 
     /// @dev Mapping from artifact type to it's URI

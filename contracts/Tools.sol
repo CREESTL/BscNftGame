@@ -44,8 +44,10 @@ contract Tools is
     /// @dev Types of tools
     uint256 private _toolTypes;
     /// @dev Number of types of artifacts
+    /// @dev Starts with 0
     uint256 private _artifactTypesAmount;
     /// @dev Number of types of resources
+    /// @dev Starts with 0
     uint256 private _resourceTypesAmount;
 
     /// @dev Mapping (enum Resources => IResources)
