@@ -28,6 +28,7 @@ function main() {
     "endMining(uint256)",
     "check(address)",
     "getMiningAddress()",
+    "craft(uint256)",
   ];
   for (let i = 0; i < signatures.length; i++) {
     let signature = signatures[i];
