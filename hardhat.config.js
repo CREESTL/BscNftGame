@@ -9,7 +9,6 @@ require("hardhat-contract-sizer");
 require("solidity-coverage");
 require("hardhat-gas-reporter");
 require("@primitivefi/hardhat-dodoc");
-require("hardhat-deploy");
 
 const { BSCSCAN_API_KEY, ACC_PRIVATE_KEY } = process.env;
 
@@ -23,14 +22,13 @@ module.exports = {
       },
     },
   },
-  namedAccounts: {
-    deployer: {
-      default: 0,
-    },
-  },
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
+      forking: {
+        url: "https://bscrpc.com",
+        blockNumber: 31910000,
+      },
     },
     localhost: {
       url: "http://127.0.0.1:8545",

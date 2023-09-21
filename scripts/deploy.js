@@ -8,7 +8,18 @@ require("dotenv").config();
 const fileName = "./deployOutput.json";
 const OUTPUT_DEPLOY = require(fileName);
 
-const PANCAKE_ROUTER_ADDRESS = process.env.PANCAKE_ROUTER_ADDRESS;
+// Router address is different for testnet and mainnet
+let PANCAKE_ROUTER_ADDRESS;
+if (network.name == "bsc_testnet") {
+  PANCAKE_ROUTER_ADDRESS = process.env.PANCAKE_ROUTER_ADDRESS_TESTNET;
+} else if (network.name == "bsc_mainnet") {
+  PANCAKE_ROUTER_ADDRESS = process.env.PANCAKE_ROUTER_ADDRESS_MAINNET;
+}
+if (PANCAKE_ROUTER_ADDRESS == "") {
+  console.log("Invalid Router address!");
+  process.exit(1);
+}
+
 const ACC_ADDRESS = process.env.ACC_ADDRESS;
 const BASE_URI = process.env.BASE_URI;
 
@@ -29,7 +40,7 @@ async function main() {
   [ownerAcc] = await ethers.getSigners();
 
   // ====================================================
-  
+
   // Contract #1: Gem
 
   contractName = "Gem";
@@ -70,12 +81,9 @@ async function main() {
   contractName = "Berry";
   console.log(`[${contractName}]: Start of Deployment...`);
   let berryFactory = await ethers.getContractFactory("PocMon");
-  const berry = await berryFactory.connect(ownerAcc).deploy(
-    PANCAKE_ROUTER_ADDRESS,
-    gem.address,
-    ACC_ADDRESS,
-    ACC_ADDRESS
-  );
+  const berry = await berryFactory
+    .connect(ownerAcc)
+    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
   await berry.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = berry.address;
@@ -115,12 +123,9 @@ async function main() {
   contractName = "Tree";
   console.log(`[${contractName}]: Start of Deployment...`);
   let treeFactory = await ethers.getContractFactory("PocMon");
-  const tree = await treeFactory.connect(ownerAcc).deploy(
-    PANCAKE_ROUTER_ADDRESS,
-    gem.address,
-    ACC_ADDRESS,
-    ACC_ADDRESS
-  );
+  const tree = await treeFactory
+    .connect(ownerAcc)
+    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
   await tree.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = tree.address;
@@ -160,12 +165,9 @@ async function main() {
   contractName = "Gold";
   console.log(`[${contractName}]: Start of Deployment...`);
   let goldFactory = await ethers.getContractFactory("PocMon");
-  const gold = await goldFactory.connect(ownerAcc).deploy(
-    PANCAKE_ROUTER_ADDRESS,
-    gem.address,
-    ACC_ADDRESS,
-    ACC_ADDRESS
-  );
+  const gold = await goldFactory
+    .connect(ownerAcc)
+    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
   await gold.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = gold.address;
@@ -372,13 +374,12 @@ async function main() {
 
   console.log(`[Tools][Proxy]: Adding 6 initial artifacts...`);
 
-  
-  if (await tools.getArtifactsAddress() != artifacts.address) {
+  if ((await tools.getArtifactsAddress()) != artifacts.address) {
     console.log("Artifacts address was not set!");
     process.exit(1);
   }
 
-  if (await tools.getMiningAddress() != mining.address) {
+  if ((await tools.getMiningAddress()) != mining.address) {
     console.log("Mining address was not set!");
     process.exit(1);
   }
@@ -395,9 +396,9 @@ async function main() {
   let transferAmount = totalSupply.mul(9900).div(10000);
 
   if (
-    ownerAcc.address != await berry.owner() ||
-    ownerAcc.address != await tree.owner() ||
-    ownerAcc.address != await gold.owner()
+    ownerAcc.address != (await berry.owner()) ||
+    ownerAcc.address != (await tree.owner()) ||
+    ownerAcc.address != (await gold.owner())
   ) {
     console.log("Invalid owner of resources");
     console.log("The real owner is: ", await berry.owner());
