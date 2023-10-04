@@ -234,7 +234,7 @@ Returns the amount of types of resources
 ### getStrength
 
 ```solidity
-function getStrength(uint256 toolId) external view returns (uint256)
+function getStrength(address user, uint256 toolId) external view returns (uint256)
 ```
 
 Returns current strength of the tool
@@ -245,6 +245,7 @@ Returns current strength of the tool
 
 | Name | Type | Description |
 |---|---|---|
+| user | address | The address of the owner of the tool |
 | toolId | uint256 | The ID of the tool |
 
 #### Returns
@@ -391,6 +392,29 @@ Mints batches of tools of different types to `to`
 | to | address | The receiver of tools |
 | toolTypes | uint256[] | Types of tools |
 | amounts | uint256[] | Amounts of tools |
+
+### ownsTool
+
+```solidity
+function ownsTool(address user, uint256 toolId) external view returns (bool)
+```
+
+Checks if user owns a tool with a given ID
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user | address | The address of the user |
+| toolId | uint256 | The ID of the tool |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | True if user owns a tool with a given ID. Otherwise - false |
 
 ### pause
 

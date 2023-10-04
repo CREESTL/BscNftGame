@@ -139,9 +139,13 @@ interface ITools is IERC1155Upgradeable {
     function getArtifactsAddress() external view returns (address);
 
     /// @notice Returns current strength of the tool
+    /// @param user The address of the owner of the tool
     /// @param toolId The ID of the tool
     /// @return Current strength of the tool
-    function getStrength(uint256 toolId) external view returns (uint256);
+    function getStrength(
+        address user,
+        uint256 toolId
+    ) external view returns (uint256);
 
     /// @notice Returns the address of Mining contract
     /// @return The address of Mining contract
@@ -158,6 +162,15 @@ interface ITools is IERC1155Upgradeable {
     /// @notice Returns the amount of types of tools
     /// @return The amount of types of tools
     function getToolsTypesAmount() external view returns (uint256);
+
+    /// @notice Checks if user owns a tool with a given ID
+    /// @param user The address of the user
+    /// @param toolId The ID of the tool
+    /// @return True if user owns a tool with a given ID. Otherwise - false
+    function ownsTool(
+        address user,
+        uint256 toolId
+    ) external view returns (bool);
 
     /// @notice Adds a new tool.
     /// @param maxStrength The maximum strength of the tool

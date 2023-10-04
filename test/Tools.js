@@ -159,6 +159,84 @@ describe("Tools contract", () => {
     };
   }
 
+  describe("Getters", () => {
+    describe("Get strength", () => {
+      it("Should get current strength of the tool", async () => {
+        let { gem, berry, tree, gold, blacklist, tools, artifacts, mining } =
+          await loadFixture(deploys);
+
+        let maxStrength = 85;
+        let miningDuration = 100;
+        let energyCost = 10;
+        let strengthCost = 30;
+        let resourcesAmount = 10000000000;
+        let artifactsAmounts = [0, 0, 0, 0, 0, 0];
+        let newURI = "testing";
+
+        await tools.addTool(
+          maxStrength,
+          miningDuration,
+          energyCost,
+          strengthCost,
+          resourcesAmount,
+          artifactsAmounts,
+          newURI
+        );
+
+        // Transfer some resources to client
+        await gold
+          .connect(ownerAcc)
+          .transfer(clientAcc1.address, await gold.balanceOf(ownerAcc.address));
+        await tree
+          .connect(ownerAcc)
+          .transfer(clientAcc1.address, await tree.balanceOf(ownerAcc.address));
+
+        // Approve transfer from client to tools
+        await gold
+          .connect(clientAcc1)
+          .approve(tools.address, await gold.balanceOf(clientAcc1.address));
+        await tree
+          .connect(clientAcc1)
+          .approve(tools.address, await tree.balanceOf(clientAcc1.address));
+
+        // Mint artifacts to client
+        let artifactAmount = 15_000_000;
+        for (let artifactType = 1; artifactType <= 6; artifactType++) {
+          await artifacts.mint(
+            artifactType,
+            clientAcc1.address,
+            artifactAmount
+          );
+        }
+        await artifacts
+          .connect(clientAcc1)
+          .setApprovalForAll(tools.address, true);
+
+        // Tool has not been crafted yet. Should have 0 strength.
+        expect(await tools.ownsTool(clientAcc1.address, 1)).to.equal(false);
+        expect(await tools.getStrength(clientAcc1.address, 1)).to.equal(0);
+        let [toolType, strength] = await tools.getToolProperties(
+          clientAcc1.address,
+          1
+        );
+        expect(strength).to.equal(0);
+
+        await tools.connect(clientAcc1).craft(1);
+
+        // Now tool's strength should be equal to max strength
+        expect(await tools.ownsTool(clientAcc1.address, 1)).to.equal(true);
+        expect(await tools.getStrength(clientAcc1.address, 1)).to.equal(
+          maxStrength
+        );
+        [toolType, strength] = await tools.getToolProperties(
+          clientAcc1.address,
+          1
+        );
+        expect(strength).to.equal(maxStrength);
+      });
+    });
+  });
+
   describe("Main functions", () => {
     describe("Craft", () => {
       describe("From Owner", () => {
