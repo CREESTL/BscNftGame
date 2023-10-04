@@ -187,8 +187,11 @@ contract Tools is
     }
 
     /// @notice See {ITools-getStrength}
-    function getStrength(uint256 toolId) external view returns (uint256) {
-        return _ownedTools[_msgSender()][toolId].strength;
+    function getStrength(
+        address user,
+        uint256 toolId
+    ) external view returns (uint256) {
+        return _ownedTools[user][toolId].strength;
     }
 
     /// @notice See {ITools-getResourcesTypesAmount}
@@ -206,6 +209,15 @@ contract Tools is
         return _toolTypes;
     }
 
+    /// @notice See {ITools-ownsTool}
+    function ownsTool(
+        address user,
+        uint256 toolId
+    ) external view returns (bool) {
+        // Initial tool type is 1. If it's a 0 - the tool does not exist.
+        return _ownedTools[user][toolId].toolType != 0;
+    }
+
     /// @notice See {ITools-addTool}
     function addTool(
         uint32 maxStrength,
@@ -216,12 +228,16 @@ contract Tools is
         uint256[] calldata artifactsAmounts,
         string calldata newURI
     ) external onlyOwner returns (uint256) {
-        require(maxStrength % 5 == 0, "Tools: invalid strength value");
+        require(
+            maxStrength % 5 == 0 && maxStrength > 0,
+            "Tools: invalid strength value"
+        );
         require(
             miningDuration > 0,
             "Tools: mining duration must be greather than zero"
         );
 
+        // First tool type is 1
         _toolTypes++;
         uint256 newType = _toolTypes;
         _typesToTools[newType].maxStrength = maxStrength;

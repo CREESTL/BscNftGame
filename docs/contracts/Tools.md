@@ -234,7 +234,7 @@ See {ITools-getResourcesTypesAmount}
 ### getStrength
 
 ```solidity
-function getStrength(uint256 toolId) external view returns (uint256)
+function getStrength(address user, uint256 toolId) external view returns (uint256)
 ```
 
 See {ITools-getStrength}
@@ -245,6 +245,7 @@ See {ITools-getStrength}
 
 | Name | Type | Description |
 |---|---|---|
+| user | address | undefined |
 | toolId | uint256 | undefined |
 
 #### Returns
@@ -480,6 +481,29 @@ function owner() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### ownsTool
+
+```solidity
+function ownsTool(address user, uint256 toolId) external view returns (bool)
+```
+
+See {ITools-ownsTool}
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| user | address | undefined |
+| toolId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### pause
 

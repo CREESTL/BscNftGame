@@ -217,7 +217,10 @@ contract PocMon is Ownable, IResources {
     }
 
     function includeInReward(address account) external onlyOwner {
-        require(_isExcludedFromRewards[account], "PocMon: account is already included");
+        require(
+            _isExcludedFromRewards[account],
+            "PocMon: account is already included"
+        );
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
                 _excluded[i] = _excluded[_excluded.length - 1];
@@ -485,7 +488,10 @@ contract PocMon is Ownable, IResources {
     function _transfer(address from, address to, uint256 amount) private {
         require(from != address(0), "PocMon: transfer from the zero address");
         require(to != address(0), "PocMon: transfer to the zero address");
-        require(amount > 0, "PocMon: transfer amount must be greater than zero");
+        require(
+            amount > 0,
+            "PocMon: transfer amount must be greater than zero"
+        );
         require(
             amount <= balanceOf(from),
             "PocMon: transfer amount exceeds balance"
