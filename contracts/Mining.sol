@@ -110,7 +110,7 @@ contract Mining is
         }
     }
 
-    /// @notice See {IMining-pause}
+    /// @notice See {IMining-startMining}
     function startMining(
         uint256 toolId,
         address user,
@@ -148,8 +148,8 @@ contract Mining is
 
         // Prevent signature replay attacks
         require(!_executed[txHash], "Mining: already executed");
-
-        // Make sure that backend has signed the tx
+        
+        // Make sure the backend has signed the tx
         require(
             _verifyBackendSignature(args.signature, txHash),
             "Mining: invalid backend signature"
@@ -165,7 +165,7 @@ contract Mining is
             uint256 energyCost
         ) = _tools.getToolProperties(args.user, args.toolId);
 
-        require(strength - strengthCost > 0, "Mining: not enougth strength");
+        require(strength - strengthCost > 0, "Mining: not enough strength");
 
         // Burn user's Berry tokens.
         IResources resource = IResources(_tools.getResourceAddress(0));
