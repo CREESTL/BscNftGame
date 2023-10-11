@@ -4,7 +4,6 @@
 
 const { arrayify } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
-const backendAcc = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY);
 const encodePacked = ethers.utils.solidityPack;
 const coder = ethers.utils.defaultAbiCoder;
 const keccak256 = ethers.utils.solidityKeccak256;
@@ -39,6 +38,7 @@ function getTxHashMining(
 
 // Forms a hash of all parameters and signs it with the backend private key
 // The resulting signature should be passed to `startMining` function as the last parameter
+// private_key: The private key to be used to sign the message
 // address: The address of the Mining contract to call
 // toolId: The ID of the tool used for mining
 // user: The user who started mining
@@ -46,6 +46,7 @@ function getTxHashMining(
 // artifactsAmount: The amount of artifacts to win after mining
 // nonce: The unique integer
 async function hashAndSignMining(
+  private_key,
   address,
   toolId,
   user,
@@ -53,8 +54,10 @@ async function hashAndSignMining(
   artifactsAmount,
   nonce
 ) {
+  // Create a new wallet with a private key
+  let signer = new ethers.Wallet(private_key);
   // Signature is prefixed with "\x19Ethereum Signed Message:\n"
-  let signature = await backendAcc.signMessage(
+  let signature = await signer.signMessage(
     // Bytes hash should be converted to array before signing
     arrayify(
       getTxHashMining(
