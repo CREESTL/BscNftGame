@@ -332,7 +332,11 @@ contract Mining is
         uint256[] memory resourcesAmount,
         uint256[] memory artifactsAmounts
     ) private {
-        for (uint256 counter = 0; counter < resourcesAmount.length; counter++) {
+        for (
+            uint256 counter = 0; 
+            counter < resourcesAmount.length; 
+            counter++
+        ) {
             if (resourcesAmount[counter] != 0) {
                 _usersToResources[user][toolId][counter] += resourcesAmount[
                     counter
@@ -341,7 +345,7 @@ contract Mining is
         }
         for (
             uint256 counter = 0;
-            counter < _tools.getArtifactsTypesAmount();
+            counter < artifactsAmounts.length;
             counter++
         ) {
             if (artifactsAmounts[counter] != 0) {
