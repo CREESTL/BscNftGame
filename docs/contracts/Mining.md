@@ -157,7 +157,7 @@ function renounceOwnership() external nonpayable
 function startMining(uint256 toolId, address user, bytes rewards, bytes signature, uint256 nonce) external nonpayable
 ```
 
-See {IMining-pause}
+See {IMining-startMining}
 
 
 
