@@ -19,17 +19,23 @@ function getFunctionSelector(signature) {
 function main() {
   // Place your signature here
   let signatures = [
+    // Tools
+    "getToolProperties(address,uint256)",
     "corrupt(address,uint256,uint256)",
-    "safeTransferFrom(address,address,uint256,uint256,bytes)",
-    "getResourcesTypesAmount()",
-    "getResourceAddress(uint256)",
-    "getArtifactsTypesAmount()",
-    "getArtifactsAddress()",
-    "endMining(uint256)",
-    "check(address)",
-    "getMiningAddress()",
     "craft(uint256)",
     "transferFrom(address,address,uint256)",
+    "safeTransferFrom(address,address,uint256,uint256,bytes)",
+    "getResourceAddress(uint256)",
+    "getArtifactsAddress()",
+    "getMiningAddress()",
+    "getResourcesTypesAmount()",
+    "getArtifactsTypesAmount()",
+    // Mining
+    "startMining(uint256,address,bytes,bytes,uint256)",
+    "endMining(uint256)",
+    "_setRewards(address,uint256,uint256[],uint256[])",
+    // Blacklist
+    "check(address)",
   ];
   for (let i = 0; i < signatures.length; i++) {
     let signature = signatures[i];
