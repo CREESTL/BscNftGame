@@ -2,6 +2,7 @@ const { ethers, network, upgrades } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const delay = require("delay");
+const { url } = require("inspector");
 require("dotenv").config();
 
 // JSON file to keep information about previous deployments
@@ -36,6 +37,18 @@ let artifactURIs = [
 
 async function main() {
   console.log(`[NOTICE!] Chain of deployment: ${network.name}`);
+  
+  // Only verify contracts when deploying to BSC Mainnet
+  let verify = true;
+  if (network.name == "bsc_mainnet") {
+    verify = false;
+  }
+  
+  if (verify) {
+    console.log("[NOTICE!] Contracts will be verified when deploying to testnet!");
+  } else {
+    console.log("[NOTICE!] Contracts will NOT be verified when deploying to mainnet!");
+  }
 
   [ownerAcc] = await ethers.getSigners();
 
@@ -52,27 +65,31 @@ async function main() {
   OUTPUT_DEPLOY[network.name][contractName].address = gem.address;
 
   // Verify
-  console.log(`[${contractName}]: Start of Verification...`);
+  if (verify) {
+    console.log(`[${contractName}]: Start of Verification...`);
 
-  await delay(90000);
+    await delay(90000);
 
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + gem.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + gem.address + "#code";
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + gem.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + gem.address + "#code";
+    }
+
+    try {
+      await hre.run("verify:verify", {
+        address: gem.address,
+        constructorArguments: [1],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(`[${contractName}]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
 
   OUTPUT_DEPLOY[network.name][contractName].verification = url;
-
-  try {
-    await hre.run("verify:verify", {
-      address: gem.address,
-      constructorArguments: [1],
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  console.log(`[${contractName}]: Verification Finished!`);
 
   // ====================================================
 
@@ -89,32 +106,36 @@ async function main() {
   OUTPUT_DEPLOY[network.name][contractName].address = berry.address;
 
   // Verify
-  console.log(`[${contractName}]: Start of Verification...`);
+  if (verify) {
+    console.log(`[${contractName}]: Start of Verification...`);
 
-  await delay(90000);
+    await delay(90000);
 
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + berry.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + berry.address + "#code";
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + berry.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + berry.address + "#code";
+    }
+
+    try {
+      await hre.run("verify:verify", {
+        address: berry.address,
+        constructorArguments: [
+          PANCAKE_ROUTER_ADDRESS,
+          gem.address,
+          ACC_ADDRESS,
+          ACC_ADDRESS,
+        ],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(`[${contractName}]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
 
   OUTPUT_DEPLOY[network.name][contractName].verification = url;
-
-  try {
-    await hre.run("verify:verify", {
-      address: berry.address,
-      constructorArguments: [
-        PANCAKE_ROUTER_ADDRESS,
-        gem.address,
-        ACC_ADDRESS,
-        ACC_ADDRESS,
-      ],
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  console.log(`[${contractName}]: Verification Finished!`);
 
   // ====================================================
 
@@ -131,32 +152,36 @@ async function main() {
   OUTPUT_DEPLOY[network.name][contractName].address = tree.address;
 
   // Verify
-  console.log(`[${contractName}]: Start of Verification...`);
+  if (verify) {
+    console.log(`[${contractName}]: Start of Verification...`);
 
-  await delay(90000);
+    await delay(90000);
 
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + tree.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + tree.address + "#code";
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + tree.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + tree.address + "#code";
+    }
+
+    try {
+      await hre.run("verify:verify", {
+        address: tree.address,
+        constructorArguments: [
+          PANCAKE_ROUTER_ADDRESS,
+          gem.address,
+          ACC_ADDRESS,
+          ACC_ADDRESS,
+        ],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(`[${contractName}]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
 
   OUTPUT_DEPLOY[network.name][contractName].verification = url;
-
-  try {
-    await hre.run("verify:verify", {
-      address: tree.address,
-      constructorArguments: [
-        PANCAKE_ROUTER_ADDRESS,
-        gem.address,
-        ACC_ADDRESS,
-        ACC_ADDRESS,
-      ],
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  console.log(`[${contractName}]: Verification Finished!`);
 
   // ====================================================
 
@@ -173,32 +198,37 @@ async function main() {
   OUTPUT_DEPLOY[network.name][contractName].address = gold.address;
 
   // Verify
-  console.log(`[${contractName}]: Start of Verification...`);
+  if (verify) {
+    console.log(`[${contractName}]: Start of Verification...`);
 
-  await delay(90000);
+    await delay(90000);
 
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + gold.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + gold.address + "#code";
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + gold.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + gold.address + "#code";
+    }
+
+
+    try {
+      await hre.run("verify:verify", {
+        address: gold.address,
+        constructorArguments: [
+          PANCAKE_ROUTER_ADDRESS,
+          gem.address,
+          ACC_ADDRESS,
+          ACC_ADDRESS,
+        ],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(`[${contractName}]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
 
   OUTPUT_DEPLOY[network.name][contractName].verification = url;
-
-  try {
-    await hre.run("verify:verify", {
-      address: gold.address,
-      constructorArguments: [
-        PANCAKE_ROUTER_ADDRESS,
-        gem.address,
-        ACC_ADDRESS,
-        ACC_ADDRESS,
-      ],
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  console.log(`[${contractName}]: Verification Finished!`);
 
   // ====================================================
 
@@ -213,27 +243,32 @@ async function main() {
   OUTPUT_DEPLOY[network.name][contractName].address = blacklist.address;
 
   // Verify
-  console.log(`[${contractName}]: Start of Verification...`);
+  if (verify) {
+    console.log(`[${contractName}]: Start of Verification...`);
 
-  await delay(90000);
+    await delay(90000);
 
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + blacklist.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + blacklist.address + "#code";
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + blacklist.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + blacklist.address + "#code";
+    }
+
+
+    try {
+      await hre.run("verify:verify", {
+        address: blacklist.address,
+        constructorArguments: [],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(`[${contractName}]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
 
   OUTPUT_DEPLOY[network.name][contractName].verification = url;
-
-  try {
-    await hre.run("verify:verify", {
-      address: blacklist.address,
-      constructorArguments: [],
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  console.log(`[${contractName}]: Verification Finished!`);
 
   // ====================================================
 
@@ -265,20 +300,25 @@ async function main() {
     toolsImplAddress;
 
   // Verify proxy
-  console.log(`[${contractName}][Proxy]: Start of Verification...`);
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + tools.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + tools.address + "#code";
-  }
-  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
+  if (verify) {
+    console.log(`[${contractName}][Proxy]: Start of Verification...`);
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + tools.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + tools.address + "#code";
+    }
 
-  try {
-    await hre.run("verify:verify", {
-      address: tools.address,
-    });
-  } catch (error) {}
-  console.log(`[${contractName}][Proxy]: Verification Finished!`);
+    try {
+      await hre.run("verify:verify", {
+        address: tools.address,
+      });
+    } catch (error) { }
+    console.log(`[${contractName}][Proxy]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
+  }
+  
+  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
   // ====================================================
 
@@ -308,20 +348,25 @@ async function main() {
     artifactsImplAddress;
 
   // Verify proxy
-  console.log(`[${contractName}][Proxy]: Start of Verification...`);
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + artifacts.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + artifacts.address + "#code";
-  }
-  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
+  if (verify) {
+    console.log(`[${contractName}][Proxy]: Start of Verification...`);
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + artifacts.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + artifacts.address + "#code";
+    }
 
-  try {
-    await hre.run("verify:verify", {
-      address: artifacts.address,
-    });
-  } catch (error) {}
-  console.log(`[${contractName}][Proxy]: Verification Finished!`);
+    try {
+      await hre.run("verify:verify", {
+        address: artifacts.address,
+      });
+    } catch (error) { }
+    console.log(`[${contractName}][Proxy]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
+  }
+  
+  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
   // ====================================================
 
@@ -350,20 +395,25 @@ async function main() {
     miningImplAddress;
 
   // Verify proxy
-  console.log(`[${contractName}][Proxy]: Start of Verification...`);
-  if (network.name === "bsc_mainnet") {
-    url = "https://bscscan.com/address/" + mining.address + "#code";
-  } else if (network.name === "bsc_testnet") {
-    url = "https://testnet.bscscan.com/address/" + mining.address + "#code";
+  if (verify) {
+    console.log(`[${contractName}][Proxy]: Start of Verification...`);
+    if (network.name === "bsc_mainnet") {
+      url = "https://bscscan.com/address/" + mining.address + "#code";
+    } else if (network.name === "bsc_testnet") {
+      url = "https://testnet.bscscan.com/address/" + mining.address + "#code";
+    }
+    try {
+      await hre.run("verify:verify", {
+        address: mining.address,
+      });
+    } catch (error) { }
+    console.log(`[${contractName}][Proxy]: Verification Finished!`);
+  } else {
+    url = "NOT VERIFIED";
   }
+  
   OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
-  try {
-    await hre.run("verify:verify", {
-      address: mining.address,
-    });
-  } catch (error) {}
-  console.log(`[${contractName}][Proxy]: Verification Finished!`);
 
   // ====================================================
 
