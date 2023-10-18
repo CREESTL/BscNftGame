@@ -2,7 +2,6 @@ const { ethers, network, upgrades } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const delay = require("delay");
-const { url } = require("inspector");
 require("dotenv").config();
 
 // JSON file to keep information about previous deployments
@@ -37,17 +36,21 @@ let artifactURIs = [
 
 async function main() {
   console.log(`[NOTICE!] Chain of deployment: ${network.name}`);
-  
+
   // Only verify contracts when deploying to BSC Mainnet
   let verify = true;
   if (network.name == "bsc_mainnet") {
     verify = false;
   }
-  
+
   if (verify) {
-    console.log("[NOTICE!] Contracts will be verified when deploying to testnet!");
+    console.log(
+      "[NOTICE!] Contracts will be verified when deploying to testnet!"
+    );
   } else {
-    console.log("[NOTICE!] Contracts will NOT be verified when deploying to mainnet!");
+    console.log(
+      "[NOTICE!] Contracts will NOT be verified when deploying to mainnet!"
+    );
   }
 
   [ownerAcc] = await ethers.getSigners();
@@ -100,7 +103,13 @@ async function main() {
   let berryFactory = await ethers.getContractFactory("PocMon");
   const berry = await berryFactory
     .connect(ownerAcc)
-    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
+    .deploy(
+      contractName,
+      PANCAKE_ROUTER_ADDRESS,
+      gem.address,
+      ACC_ADDRESS,
+      ACC_ADDRESS
+    );
   await berry.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = berry.address;
@@ -121,6 +130,7 @@ async function main() {
       await hre.run("verify:verify", {
         address: berry.address,
         constructorArguments: [
+          contractName,
           PANCAKE_ROUTER_ADDRESS,
           gem.address,
           ACC_ADDRESS,
@@ -146,7 +156,13 @@ async function main() {
   let treeFactory = await ethers.getContractFactory("PocMon");
   const tree = await treeFactory
     .connect(ownerAcc)
-    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
+    .deploy(
+      contractName,
+      PANCAKE_ROUTER_ADDRESS,
+      gem.address,
+      ACC_ADDRESS,
+      ACC_ADDRESS
+    );
   await tree.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = tree.address;
@@ -167,6 +183,7 @@ async function main() {
       await hre.run("verify:verify", {
         address: tree.address,
         constructorArguments: [
+          contractName,
           PANCAKE_ROUTER_ADDRESS,
           gem.address,
           ACC_ADDRESS,
@@ -192,7 +209,13 @@ async function main() {
   let goldFactory = await ethers.getContractFactory("PocMon");
   const gold = await goldFactory
     .connect(ownerAcc)
-    .deploy(PANCAKE_ROUTER_ADDRESS, gem.address, ACC_ADDRESS, ACC_ADDRESS);
+    .deploy(
+      contractName,
+      PANCAKE_ROUTER_ADDRESS,
+      gem.address,
+      ACC_ADDRESS,
+      ACC_ADDRESS
+    );
   await gold.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY[network.name][contractName].address = gold.address;
@@ -209,11 +232,11 @@ async function main() {
       url = "https://testnet.bscscan.com/address/" + gold.address + "#code";
     }
 
-
     try {
       await hre.run("verify:verify", {
         address: gold.address,
         constructorArguments: [
+          contractName,
           PANCAKE_ROUTER_ADDRESS,
           gem.address,
           ACC_ADDRESS,
@@ -251,9 +274,9 @@ async function main() {
     if (network.name === "bsc_mainnet") {
       url = "https://bscscan.com/address/" + blacklist.address + "#code";
     } else if (network.name === "bsc_testnet") {
-      url = "https://testnet.bscscan.com/address/" + blacklist.address + "#code";
+      url =
+        "https://testnet.bscscan.com/address/" + blacklist.address + "#code";
     }
-
 
     try {
       await hre.run("verify:verify", {
@@ -312,12 +335,12 @@ async function main() {
       await hre.run("verify:verify", {
         address: tools.address,
       });
-    } catch (error) { }
+    } catch (error) {}
     console.log(`[${contractName}][Proxy]: Verification Finished!`);
   } else {
     url = "NOT VERIFIED";
   }
-  
+
   OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
   // ====================================================
@@ -353,19 +376,20 @@ async function main() {
     if (network.name === "bsc_mainnet") {
       url = "https://bscscan.com/address/" + artifacts.address + "#code";
     } else if (network.name === "bsc_testnet") {
-      url = "https://testnet.bscscan.com/address/" + artifacts.address + "#code";
+      url =
+        "https://testnet.bscscan.com/address/" + artifacts.address + "#code";
     }
 
     try {
       await hre.run("verify:verify", {
         address: artifacts.address,
       });
-    } catch (error) { }
+    } catch (error) {}
     console.log(`[${contractName}][Proxy]: Verification Finished!`);
   } else {
     url = "NOT VERIFIED";
   }
-  
+
   OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
   // ====================================================
@@ -406,14 +430,13 @@ async function main() {
       await hre.run("verify:verify", {
         address: mining.address,
       });
-    } catch (error) { }
+    } catch (error) {}
     console.log(`[${contractName}][Proxy]: Verification Finished!`);
   } else {
     url = "NOT VERIFIED";
   }
-  
-  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
+  OUTPUT_DEPLOY[network.name][contractName].proxyVerification = url;
 
   // ====================================================
 

@@ -12,6 +12,7 @@ const { parseEther, parseUnits } = ethers.utils;
 let PANCAKE_ROUTER_ADDRESS;
 if (network.name == "hardhat") {
   PANCAKE_ROUTER_ADDRESS = process.env.PANCAKE_ROUTER_ADDRESS_MAINNET;
+  console.log("\n\n[NOTICE!] Make sure you run tests in forked BSC Mainnet!");
 } else {
   console.log("Can only run tests on local fork of BSC Mainnet");
   process.exit(1);
@@ -49,6 +50,7 @@ describe("Tools contract", () => {
     const berry = await berryFactory
       .connect(ownerAcc)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
@@ -63,6 +65,7 @@ describe("Tools contract", () => {
     const tree = await treeFactory
       .connect(ownerAcc)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
@@ -77,6 +80,7 @@ describe("Tools contract", () => {
     const gold = await goldFactory
       .connect(ownerAcc)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,

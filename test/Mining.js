@@ -6,8 +6,10 @@ const {
 } = require("@nomicfoundation/hardhat-network-helpers");
 const { hashAndSignMining, getRewardsHash } = require("../scripts/hash.js");
 let PANCAKE_ROUTER_ADDRESS;
+
 if (network.name == "hardhat") {
   PANCAKE_ROUTER_ADDRESS = process.env.PANCAKE_ROUTER_ADDRESS_MAINNET;
+  console.log("\n\n[NOTICE!] Make sure you run tests in forked BSC Mainnet!");
 } else {
   console.log("Can only run tests on local fork of BSC Mainnet");
   process.exit(1);
@@ -57,6 +59,7 @@ describe("Mining contract", () => {
     const berry = await berryFactory
       .connect(signer)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
@@ -71,6 +74,7 @@ describe("Mining contract", () => {
     const tree = await treeFactory
       .connect(signer)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
@@ -85,6 +89,7 @@ describe("Mining contract", () => {
     const gold = await goldFactory
       .connect(signer)
       .deploy(
+        contractName,
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
