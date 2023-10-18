@@ -59,12 +59,13 @@ contract PocMon is Ownable, IResources {
     }
 
     constructor(
+        string memory name_,
         address router,
         address compensationToken_,
         address devAddress,
         address owner_
     ) Ownable() {
-        _name = "PocMon";
+        _name = name_;
         _symbol = "MON";
         _decimals = 9;
         _tTotal = 300_000_000 * 10 ** 9;
