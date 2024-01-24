@@ -222,7 +222,7 @@ contract Tools is
     function addTool(
         uint32 maxStrength,
         uint32 miningDuration,
-        uint32 energyCost,
+        uint256 energyCost,
         uint32 strengthCost,
         uint256 resourcesAmount,
         uint256[] calldata artifactsAmounts,
@@ -256,7 +256,7 @@ contract Tools is
         uint256 toolType,
         uint32 maxStrength,
         uint32 miningDuration,
-        uint32 energyCost,
+        uint256 energyCost,
         uint32 strengthCost
     ) external onlyOwner {
         require(toolType <= _toolTypes, "Tools: invalid toolTypes value");
@@ -541,6 +541,16 @@ contract Tools is
 
         uint256 toolType = _ownedTools[from][toolId].toolType;
         require(toolType > 0, "Tools: tool doesn't exist");
+
+        if (
+            _ownedTools[from][toolId].strength !=
+            _typesToTools[toolType].maxStrength
+        ) {
+            require(
+                from == _miningAddress || to == _miningAddress,
+                "Tools: transfer of used tool not to the mining"
+            );
+        }
 
         super.safeTransferFrom(from, to, toolType, amount, data);
         emit Transfer(from, to, toolType, toolId);

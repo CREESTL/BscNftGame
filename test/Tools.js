@@ -8,6 +8,11 @@ const {
 
 const zeroAddress = ethers.constants.AddressZero;
 const { parseEther, parseUnits } = ethers.utils;
+const { hashAndSignMining, getRewardsHash } = require("../scripts/hash.js");
+
+const ACC_PRIVATE_KEY = process.env.ACC_PRIVATE_KEY;
+const unconnectedSigner = new ethers.Wallet(ACC_PRIVATE_KEY);
+const signer = unconnectedSigner.connect(ethers.provider);
 
 let PANCAKE_ROUTER_ADDRESS;
 if (network.name == "hardhat") {
@@ -46,7 +51,7 @@ describe("Tools contract", () => {
     // Contract #2: Berry
 
     contractName = "Berry";
-    let berryFactory = await ethers.getContractFactory("PocMon");
+    let berryFactory = await ethers.getContractFactory("Berry");
     const berry = await berryFactory
       .connect(ownerAcc)
       .deploy(
@@ -54,14 +59,14 @@ describe("Tools contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await berry.deployed();
 
     // Contract #3: Tree
 
     contractName = "Tree";
-    let treeFactory = await ethers.getContractFactory("PocMon");
+    let treeFactory = await ethers.getContractFactory("Tree");
     const tree = await treeFactory
       .connect(ownerAcc)
       .deploy(
@@ -69,14 +74,14 @@ describe("Tools contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await tree.deployed();
 
     // Contract #4: Gold
 
     contractName = "Gold";
-    let goldFactory = await ethers.getContractFactory("PocMon");
+    let goldFactory = await ethers.getContractFactory("Gold");
     const gold = await goldFactory
       .connect(ownerAcc)
       .deploy(
@@ -84,7 +89,7 @@ describe("Tools contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await gold.deployed();
 
@@ -184,7 +189,7 @@ describe("Tools contract", () => {
           strengthCost,
           resourcesAmount,
           artifactsAmounts,
-          newURI
+          newURI,
         );
 
         // Transfer some resources to client
@@ -209,7 +214,7 @@ describe("Tools contract", () => {
           await artifacts.mint(
             artifactType,
             clientAcc1.address,
-            artifactAmount
+            artifactAmount,
           );
         }
         await artifacts
@@ -221,7 +226,7 @@ describe("Tools contract", () => {
         expect(await tools.getStrength(clientAcc1.address, 1)).to.equal(0);
         let [toolType, strength] = await tools.getToolProperties(
           clientAcc1.address,
-          1
+          1,
         );
         expect(strength).to.equal(0);
 
@@ -230,11 +235,11 @@ describe("Tools contract", () => {
         // Now tool's strength should be equal to max strength
         expect(await tools.ownsTool(clientAcc1.address, 1)).to.equal(true);
         expect(await tools.getStrength(clientAcc1.address, 1)).to.equal(
-          maxStrength
+          maxStrength,
         );
         [toolType, strength] = await tools.getToolProperties(
           clientAcc1.address,
-          1
+          1,
         );
         expect(strength).to.equal(maxStrength);
       });
@@ -263,23 +268,23 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           await gold.approve(
             tools.address,
-            await gold.balanceOf(ownerAcc.address)
+            await gold.balanceOf(ownerAcc.address),
           );
           await tree.approve(
             tools.address,
-            await tree.balanceOf(ownerAcc.address)
+            await tree.balanceOf(ownerAcc.address),
           );
           let artifactAmount = 15_000_000;
           for (let artifactType = 1; artifactType <= 6; artifactType++) {
             await artifacts.mint(
               artifactType,
               ownerAcc.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts.setApprovalForAll(tools.address, true);
@@ -306,23 +311,23 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           await gold.approve(
             tools.address,
-            await gold.balanceOf(ownerAcc.address)
+            await gold.balanceOf(ownerAcc.address),
           );
           await tree.approve(
             tools.address,
-            await tree.balanceOf(ownerAcc.address)
+            await tree.balanceOf(ownerAcc.address),
           );
           let artifactAmount = 15_000_000;
           for (let artifactType = 1; artifactType <= 6; artifactType++) {
             await artifacts.mint(
               artifactType,
               ownerAcc.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts.setApprovalForAll(tools.address, true);
@@ -349,23 +354,23 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           await gold.approve(
             tools.address,
-            await gold.balanceOf(ownerAcc.address)
+            await gold.balanceOf(ownerAcc.address),
           );
           await tree.approve(
             tools.address,
-            await tree.balanceOf(ownerAcc.address)
+            await tree.balanceOf(ownerAcc.address),
           );
           let artifactAmount = 15_000_000;
           for (let artifactType = 1; artifactType <= 6; artifactType++) {
             await artifacts.mint(
               artifactType,
               ownerAcc.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts.setApprovalForAll(tools.address, true);
@@ -394,17 +399,17 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Approve transfer of resources to craft
           await gold.approve(
             tools.address,
-            await gold.balanceOf(ownerAcc.address)
+            await gold.balanceOf(ownerAcc.address),
           );
           await tree.approve(
             tools.address,
-            await tree.balanceOf(ownerAcc.address)
+            await tree.balanceOf(ownerAcc.address),
           );
           // Mint artifacts
           let artifactAmount = 15_000_000;
@@ -412,7 +417,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               ownerAcc.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           // Approve transfer of artifacts to craft
@@ -442,7 +447,7 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Transfer some resources to client
@@ -450,13 +455,13 @@ describe("Tools contract", () => {
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await gold.balanceOf(ownerAcc.address)
+              await gold.balanceOf(ownerAcc.address),
             );
           await tree
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await tree.balanceOf(ownerAcc.address)
+              await tree.balanceOf(ownerAcc.address),
             );
 
           // Approve transfer from client to tools
@@ -473,7 +478,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               clientAcc1.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts
@@ -501,7 +506,7 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Transfer some resources to client
@@ -509,13 +514,13 @@ describe("Tools contract", () => {
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await gold.balanceOf(ownerAcc.address)
+              await gold.balanceOf(ownerAcc.address),
             );
           await tree
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await tree.balanceOf(ownerAcc.address)
+              await tree.balanceOf(ownerAcc.address),
             );
 
           // Approve transfer from client to tools
@@ -532,7 +537,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               clientAcc1.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts
@@ -560,7 +565,7 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Transfer some resources to client
@@ -568,13 +573,13 @@ describe("Tools contract", () => {
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await gold.balanceOf(ownerAcc.address)
+              await gold.balanceOf(ownerAcc.address),
             );
           await tree
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await tree.balanceOf(ownerAcc.address)
+              await tree.balanceOf(ownerAcc.address),
             );
 
           // Approve transfer from client to tools
@@ -591,7 +596,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               clientAcc1.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts
@@ -620,7 +625,7 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Transfer some resources to client
@@ -628,13 +633,13 @@ describe("Tools contract", () => {
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await gold.balanceOf(ownerAcc.address)
+              await gold.balanceOf(ownerAcc.address),
             );
           await tree
             .connect(ownerAcc)
             .transfer(
               clientAcc1.address,
-              await tree.balanceOf(ownerAcc.address)
+              await tree.balanceOf(ownerAcc.address),
             );
 
           // Approve transfer from client to tools
@@ -651,7 +656,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               clientAcc1.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts
@@ -681,19 +686,19 @@ describe("Tools contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
           // Transfer some resources to client
           await gold.connect(ownerAcc).transfer(
             clientAcc1.address,
             // Give client not enough resources for craft
-            100
+            100,
           );
           await tree.connect(ownerAcc).transfer(
             clientAcc1.address,
             // Give client not enough resources for craft
-            100
+            100,
           );
 
           // Approve transfer from client to tools
@@ -710,7 +715,7 @@ describe("Tools contract", () => {
             await artifacts.mint(
               artifactType,
               clientAcc1.address,
-              artifactAmount
+              artifactAmount,
             );
           }
           await artifacts
@@ -718,10 +723,220 @@ describe("Tools contract", () => {
             .setApprovalForAll(tools.address, true);
 
           await expect(tools.connect(clientAcc1).craft(1)).to.be.revertedWith(
-            "PocMon: transfer amount exceeds balance"
+            "PocMon: transfer amount exceeds balance",
           );
         });
       });
+    });
+  });
+  describe("Transfer", () => {
+    it("Should transfer tool with not max strength to mining", async () => {
+      let { gem, berry, tree, gold, blacklist, tools, artifacts, mining } =
+        await loadFixture(deploys);
+
+      let maxStrength = 85;
+      let miningDuration = 100;
+      let energyCost = 10;
+      let strengthCost = 30;
+      let resourcesAmount = 10000000000;
+      let artifactsAmounts = [0, 0, 0, 0, 0, 0];
+      let newURI = "testing";
+
+      await tools.addTool(
+        maxStrength,
+        miningDuration,
+        energyCost,
+        strengthCost,
+        resourcesAmount,
+        artifactsAmounts,
+        newURI,
+      );
+
+      await tools.mint(clientAcc1.address, 1, 1);
+      expect(await tools.ownsTool(clientAcc1.address, 1)).to.be.true;
+
+      // increase maxStrength for tool with type 1
+      await tools.setToolProperties(
+        1,
+        maxStrength + 5,
+        miningDuration,
+        energyCost,
+        strengthCost,
+      );
+
+      // should transfer to mining
+      await expect(
+        tools
+          .connect(clientAcc1)
+          .safeTransferFrom(
+            clientAcc1.address,
+            mining.address,
+            1,
+            1,
+            ethers.utils.toUtf8Bytes(""),
+          ),
+      ).to.be.not.reverted;
+    });
+
+    it("Should transfer tool with not max strength from mining", async () => {
+      let { gem, berry, tree, gold, blacklist, tools, artifacts, mining } =
+        await loadFixture(deploys);
+
+      let maxStrength = 85;
+      let miningDuration = 100;
+      let energyCost = 10;
+      let strengthCost = 30;
+      let resourcesAmount = 10000000000;
+      let artifactsAmounts = [0, 0, 0, 0, 0, 0];
+      let newURI = "testing";
+
+      await tools.addTool(
+        maxStrength,
+        miningDuration,
+        energyCost,
+        strengthCost,
+        resourcesAmount,
+        artifactsAmounts,
+        newURI,
+      );
+
+      await tools.mint(signer.address, 1, 1);
+      expect(await tools.ownsTool(signer.address, 1)).to.be.true;
+
+      // increase maxStrength for tool with type 1
+      await tools.setToolProperties(
+        1,
+        maxStrength + 5,
+        miningDuration,
+        energyCost,
+        strengthCost,
+      );
+
+      // Proceed transfer to mining
+
+      // Send funds from owner to signer for gas
+      let tx = {
+        from: ownerAcc.address,
+        to: signer.address,
+        value: ethers.utils.parseEther("2"),
+      };
+      await ownerAcc.sendTransaction(tx);
+      await mining.connect(ownerAcc).transferOwnership(signer.address);
+
+      // Random nonce for mining
+      let nonce = 777;
+      // ID of the freshly crafted tool
+      let toolId = 1;
+
+      // Amount of resources to win after mining
+      // Random numbers
+      let resourceWinAmount = [1_000_000, 1_000_100, 1_000_200];
+      // Amount of artifacts to win after mining
+      // Random numbers
+      let artifactWinAmount = [1, 2, 3];
+
+      // Encode parameters to start mining
+      let encodedRewards = getRewardsHash(resourceWinAmount, artifactWinAmount);
+
+      let signature = hashAndSignMining(
+        ACC_PRIVATE_KEY,
+        mining.address,
+        1,
+        signer.address,
+        resourceWinAmount,
+        artifactWinAmount,
+        nonce,
+      );
+
+      // Approve transfer of resources and tools
+      await berry
+        .connect(ownerAcc)
+        .transfer(signer.address, await berry.balanceOf(ownerAcc.address));
+      await berry
+        .connect(signer)
+        .approve(mining.address, await berry.balanceOf(signer.address));
+      await tools.connect(signer).setApprovalForAll(mining.address, true);
+
+      // Now start mining
+      await expect(
+        mining
+          .connect(signer)
+          .startMining(1, signer.address, encodedRewards, signature, nonce),
+      ).to.emit(mining, "MiningStarted");
+
+      // wait miningDuration time
+      await time.increase(miningDuration);
+
+      // end mining(transfer tool from mining)
+      await expect(mining.connect(signer).endMining(1)).to.be.not.reverted;
+    });
+
+    it("Should fail transfer tool with not max strength to user", async () => {
+      let { gem, berry, tree, gold, blacklist, tools, artifacts, mining } =
+        await loadFixture(deploys);
+
+      let maxStrength = 85;
+      let miningDuration = 100;
+      let energyCost = 10;
+      let strengthCost = 30;
+      let resourcesAmount = 10000000000;
+      let artifactsAmounts = [0, 0, 0, 0, 0, 0];
+      let newURI = "testing";
+
+      await tools.addTool(
+        maxStrength,
+        miningDuration,
+        energyCost,
+        strengthCost,
+        resourcesAmount,
+        artifactsAmounts,
+        newURI,
+      );
+
+      await tools.mint(clientAcc1.address, 1, 2);
+      expect(await tools.ownsTool(clientAcc1.address, 1)).to.be.true;
+      expect(await tools.ownsTool(clientAcc1.address, 2)).to.be.true;
+      expect(await tools.getStrength(clientAcc1.address, 1)).to.be.equal(
+        maxStrength,
+      );
+      expect(await tools.getStrength(clientAcc1.address, 2)).to.be.equal(
+        maxStrength,
+      );
+
+      // should transfer token with max strength
+      await tools
+        .connect(clientAcc1)
+        .safeTransferFrom(
+          clientAcc1.address,
+          clientAcc2.address,
+          1,
+          1,
+          ethers.utils.toUtf8Bytes(""),
+        );
+      expect(await tools.ownsTool(clientAcc2.address, 1)).to.be.true;
+      expect(await tools.ownsTool(clientAcc1.address, 1)).to.be.false;
+
+      // increase maxStrength for tool with type 1
+      await tools.setToolProperties(
+        1,
+        maxStrength + 5,
+        miningDuration,
+        energyCost,
+        strengthCost,
+      );
+
+      // should fail transfer to user
+      await expect(
+        tools
+          .connect(clientAcc1)
+          .safeTransferFrom(
+            clientAcc1.address,
+            clientAcc2.address,
+            2,
+            1,
+            ethers.utils.toUtf8Bytes(""),
+          ),
+      ).to.be.revertedWith("Tools: transfer of used tool not to the mining");
     });
   });
 });

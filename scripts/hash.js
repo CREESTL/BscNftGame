@@ -23,16 +23,16 @@ function getTxHashMining(
   user,
   recourcesAmount,
   artifactsAmount,
-  nonce
+  nonce,
 ) {
   return keccak256(
     ["bytes"],
     [
       encodePacked(
         ["address", "uint256", "address", "uint256[]", "uint256[]", "uint256"],
-        [address, toolId, user, recourcesAmount, artifactsAmount, nonce]
+        [address, toolId, user, recourcesAmount, artifactsAmount, nonce],
       ),
-    ]
+    ],
   );
 }
 
@@ -52,7 +52,7 @@ async function hashAndSignMining(
   user,
   recourcesAmount,
   artifactsAmount,
-  nonce
+  nonce,
 ) {
   // Create a new wallet with a private key
   let signer = new ethers.Wallet(private_key);
@@ -66,9 +66,9 @@ async function hashAndSignMining(
         user,
         recourcesAmount,
         artifactsAmount,
-        nonce
-      )
-    )
+        nonce,
+      ),
+    ),
   );
 
   return signature;
@@ -81,7 +81,7 @@ async function hashAndSignMining(
 function getRewardsHash(resourcesAmount, artifactsAmount) {
   return coder.encode(
     ["uint256[]", "uint256[]"],
-    [resourcesAmount, artifactsAmount]
+    [resourcesAmount, artifactsAmount],
   );
 }
 
