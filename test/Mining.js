@@ -55,7 +55,7 @@ describe("Mining contract", () => {
     // Contract #2: Berry
 
     contractName = "Berry";
-    let berryFactory = await ethers.getContractFactory("PocMon");
+    let berryFactory = await ethers.getContractFactory("Berry");
     const berry = await berryFactory
       .connect(signer)
       .deploy(
@@ -63,14 +63,14 @@ describe("Mining contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
-        signer.address
+        signer.address,
       );
     await berry.deployed();
 
     // Contract #3: Tree
 
     contractName = "Tree";
-    let treeFactory = await ethers.getContractFactory("PocMon");
+    let treeFactory = await ethers.getContractFactory("Tree");
     const tree = await treeFactory
       .connect(signer)
       .deploy(
@@ -78,14 +78,14 @@ describe("Mining contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
-        signer.address
+        signer.address,
       );
     await tree.deployed();
 
     // Contract #4: Gold
 
     contractName = "Gold";
-    let goldFactory = await ethers.getContractFactory("PocMon");
+    let goldFactory = await ethers.getContractFactory("Gold");
     const gold = await goldFactory
       .connect(signer)
       .deploy(
@@ -93,7 +93,7 @@ describe("Mining contract", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         signer.address,
-        signer.address
+        signer.address,
       );
     await gold.deployed();
 
@@ -124,7 +124,7 @@ describe("Mining contract", () => {
     let artifactsFactory = await ethers.getContractFactory(contractName);
     const artifacts = await upgrades.deployProxy(
       artifactsFactory.connect(signer),
-      [tools.address, BASE_URI, blacklist.address]
+      [tools.address, BASE_URI, blacklist.address],
     );
     await artifacts.deployed();
 
@@ -193,7 +193,7 @@ describe("Mining contract", () => {
             strengthCost,
             resourcesAmount,
             artifactsAmounts,
-            newURI
+            newURI,
           );
 
         await gold
@@ -228,7 +228,7 @@ describe("Mining contract", () => {
         // Encode parameters to start mining
         let encodedRewards = getRewardsHash(
           resourceWinAmount,
-          artifactWinAmount
+          artifactWinAmount,
         );
 
         let signature = hashAndSignMining(
@@ -238,7 +238,7 @@ describe("Mining contract", () => {
           signer.address,
           resourceWinAmount,
           artifactWinAmount,
-          nonce
+          nonce,
         );
 
         // Approve transfer of resources and tools
@@ -251,7 +251,7 @@ describe("Mining contract", () => {
         await expect(
           mining
             .connect(signer)
-            .startMining(1, signer.address, encodedRewards, signature, nonce)
+            .startMining(1, signer.address, encodedRewards, signature, nonce),
         ).to.emit(mining, "MiningStarted");
       });
     });

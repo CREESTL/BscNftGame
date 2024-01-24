@@ -25,7 +25,7 @@ interface ITools is IERC1155Upgradeable {
         uint32 strengthCost; // Cost of using this tool for mining. Strength decreases each time
         uint32 maxStrength; // Max strength of a tool
         uint32 miningDuration; // The duraion of mining session with this tool
-        uint32 energyCost; // Cost in Berry tokens to start mining session with this tool
+        uint256 energyCost; // Cost in Berry tokens to start mining session with this tool
     }
 
     /// @dev Represents a tool owned by a user
@@ -184,7 +184,7 @@ interface ITools is IERC1155Upgradeable {
     function addTool(
         uint32 maxStrength,
         uint32 miningDuration,
-        uint32 energyCost,
+        uint256 energyCost,
         uint32 strengthCost,
         uint256 resourcesAmount,
         uint256[] calldata artifactsAmounts,
@@ -201,7 +201,7 @@ interface ITools is IERC1155Upgradeable {
         uint256 toolType,
         uint32 maxStrength,
         uint32 miningDuration,
-        uint32 energyCost,
+        uint256 energyCost,
         uint32 strengthCost
     ) external;
 

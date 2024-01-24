@@ -11,11 +11,10 @@ import "./interfaces/UniswapInterfaces.sol";
 import "./interfaces/IGem.sol";
 import "./interfaces/IResources.sol";
 
-/// @title This contract represents 3 types of resources used to start mining,
-///        buy and craft tools
+/// @title Tree token
 /// @dev This token implements the reflection mechanism (RFI).
 ///      For more details see: https://reflect-contract-doc.netlify.app/
-contract PocMon is Ownable, IResources {
+contract Tree is Ownable, IResources {
     using SafeMath for uint256;
     using Address for address;
 
@@ -66,7 +65,7 @@ contract PocMon is Ownable, IResources {
         address owner_
     ) Ownable() {
         _name = name_;
-        _symbol = "MON";
+        _symbol = "TREE";
         _decimals = 9;
         _tTotal = 300_000_000 * 10 ** 9;
         _rTotal = (MAX - (MAX % _tTotal));

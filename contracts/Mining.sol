@@ -165,7 +165,7 @@ contract Mining is
             uint256 energyCost
         ) = _tools.getToolProperties(args.user, args.toolId);
 
-        require(strength - strengthCost > 0, "Mining: not enough strength");
+        require(strength - strengthCost >= 0, "Mining: not enough strength");
 
         // Burn user's Berry tokens.
         IResources resource = IResources(_tools.getResourceAddress(0));

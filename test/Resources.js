@@ -46,7 +46,7 @@ describe("Resources (Berry, Tree, Gold) contracts", () => {
     // Contract #2: Berry
 
     contractName = "Berry";
-    let berryFactory = await ethers.getContractFactory("PocMon");
+    let berryFactory = await ethers.getContractFactory("Berry");
     const berry = await berryFactory
       .connect(ownerAcc)
       .deploy(
@@ -54,14 +54,14 @@ describe("Resources (Berry, Tree, Gold) contracts", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await berry.deployed();
 
     // Contract #3: Tree
 
     contractName = "Tree";
-    let treeFactory = await ethers.getContractFactory("PocMon");
+    let treeFactory = await ethers.getContractFactory("Tree");
     const tree = await treeFactory
       .connect(ownerAcc)
       .deploy(
@@ -69,14 +69,14 @@ describe("Resources (Berry, Tree, Gold) contracts", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await tree.deployed();
 
     // Contract #4: Gold
 
     contractName = "Gold";
-    let goldFactory = await ethers.getContractFactory("PocMon");
+    let goldFactory = await ethers.getContractFactory("Gold");
     const gold = await goldFactory
       .connect(ownerAcc)
       .deploy(
@@ -84,7 +84,7 @@ describe("Resources (Berry, Tree, Gold) contracts", () => {
         PANCAKE_ROUTER_ADDRESS,
         gem.address,
         ownerAcc.address,
-        ownerAcc.address
+        ownerAcc.address,
       );
     await gold.deployed();
 
