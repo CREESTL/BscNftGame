@@ -8,6 +8,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const tree = await get("Tree");
   const gold = await get("Gold");
 
+    //TODO: 
 console.log("Berry address is: ", berry.address)
 console.log("Tree address is: ", tree.address)
 console.log("Gold address is: ", gold.address)
@@ -18,16 +19,19 @@ console.log("Gold address is: ", gold.address)
       proxyContract: "OpenZeppelinTransparentProxy",
       owner: deployer,
       execute: {
-        methodName: "initialize",
-        args: [
-          blacklist.address,
-          berry.address,
-          tree.address,
-          gold.address,
-          BASE_URI,
-        ],
+        init: {
+          methodName: "initialize",
+          args: [
+            blacklist.address,
+            berry.address,
+            tree.address,
+            gold.address,
+            BASE_URI,
+          ],
+        },
       },
     },
+    log: true
   });
   if (deployResult.newlyDeployed) {
     log(`Tools deployed at ${deployResult.address}`);
