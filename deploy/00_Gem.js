@@ -5,6 +5,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const deployResult = await deploy("Gem", {
     from: deployer,
     args: [1],
+    log: True
   });
   if (deployResult.newlyDeployed) {
     log(`Gem deployed at ${deployResult.address}`);

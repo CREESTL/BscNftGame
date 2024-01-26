@@ -19,6 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     from: deployer,
     contract: "Gold",
     args: ["GOLD", PANCAKE_ROUTER_ADDRESS, gem.address, deployer, deployer],
+    log: true
   });
   if (deployResult.newlyDeployed) {
     log(`Gold deployed at ${deployResult.address}`);

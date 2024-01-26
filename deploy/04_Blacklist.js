@@ -4,6 +4,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const deployResult = await deploy("BlackList", {
     from: deployer,
+    log: true
   });
   if (deployResult.newlyDeployed) {
     log(`Blacklist deployed at ${deployResult.address}`);

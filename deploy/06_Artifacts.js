@@ -18,6 +18,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         }
       },
     },
+    log: true
   });
   if (deployResult.newlyDeployed) {
     log(`Artifacts deployed at ${deployResult.address}`);
