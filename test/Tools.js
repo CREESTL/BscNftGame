@@ -723,7 +723,7 @@ describe("Tools contract", () => {
             .setApprovalForAll(tools.address, true);
 
           await expect(tools.connect(clientAcc1).craft(1)).to.be.revertedWith(
-            "PocMon: transfer amount exceeds balance",
+            "Gold: transfer amount exceeds balance",
           );
         });
       });

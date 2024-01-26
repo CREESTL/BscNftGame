@@ -13,7 +13,7 @@
 ### addTool
 
 ```solidity
-function addTool(uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmounts, string newURI) external nonpayable returns (uint256)
+function addTool(uint32 maxStrength, uint32 miningDuration, uint256 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmounts, string newURI) external nonpayable returns (uint256)
 ```
 
 See {ITools-addTool}
@@ -26,7 +26,7 @@ See {ITools-addTool}
 |---|---|---|
 | maxStrength | uint32 | undefined |
 | miningDuration | uint32 | undefined |
-| energyCost | uint32 | undefined |
+| energyCost | uint256 | undefined |
 | strengthCost | uint32 | undefined |
 | resourcesAmount | uint256 | undefined |
 | artifactsAmounts | uint256[] | undefined |
@@ -686,7 +686,7 @@ See {ITools-setRecipe}
 ### setToolProperties
 
 ```solidity
-function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost) external nonpayable
+function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDuration, uint256 energyCost, uint32 strengthCost) external nonpayable
 ```
 
 See {ITools-setToolProperties}
@@ -700,7 +700,7 @@ See {ITools-setToolProperties}
 | toolType | uint256 | undefined |
 | maxStrength | uint32 | undefined |
 | miningDuration | uint32 | undefined |
-| energyCost | uint32 | undefined |
+| energyCost | uint256 | undefined |
 | strengthCost | uint32 | undefined |
 
 ### setURI

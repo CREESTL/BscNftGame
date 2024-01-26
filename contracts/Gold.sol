@@ -154,7 +154,7 @@ contract Gold is Ownable, IResources {
             _msgSender(),
             _allowances[sender][_msgSender()].sub(
                 amount,
-                "PocMon: transfer amount exceeds allowance"
+                "Gold: transfer amount exceeds allowance"
             )
         );
         return true;
@@ -198,7 +198,7 @@ contract Gold is Ownable, IResources {
             spender,
             _allowances[_msgSender()][spender].sub(
                 subtractedValue,
-                "PocMon: decreased allowance below zero"
+                "Gold: decreased allowance below zero"
             )
         );
         return true;
@@ -207,7 +207,7 @@ contract Gold is Ownable, IResources {
     function excludeFromReward(address account) external onlyOwner {
         require(
             !_isExcludedFromRewards[account],
-            "PocMon: account is already excluded"
+            "Gold: account is already excluded"
         );
         if (_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -219,7 +219,7 @@ contract Gold is Ownable, IResources {
     function includeInReward(address account) external onlyOwner {
         require(
             _isExcludedFromRewards[account],
-            "PocMon: account is already included"
+            "Gold: account is already included"
         );
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
@@ -245,7 +245,7 @@ contract Gold is Ownable, IResources {
     ) external onlyOwner {
         require(
             reflectionFee_ + _liquidityFee + _gemFee < 15,
-            "PocMon: you have reached fee limit"
+            "Gold: you have reached fee limit"
         );
         _reflectionFee = reflectionFee_;
     }
@@ -253,7 +253,7 @@ contract Gold is Ownable, IResources {
     function setGemFeePercent(uint256 gemFee_) external onlyOwner {
         require(
             _reflectionFee + _liquidityFee + gemFee_ < 15,
-            "PocMon: you have reached fee limit"
+            "Gold: you have reached fee limit"
         );
         _gemFee = gemFee_;
     }
@@ -261,7 +261,7 @@ contract Gold is Ownable, IResources {
     function setLiquidityFeePercent(uint256 liquidityFee_) external onlyOwner {
         require(
             _reflectionFee + liquidityFee_ + _gemFee < 15,
-            "PocMon: you have reached fee limit"
+            "Gold: you have reached fee limit"
         );
         _liquidityFee = liquidityFee_;
     }
@@ -269,7 +269,7 @@ contract Gold is Ownable, IResources {
     function setMaxTxAmount(uint256 maxTxAmount) external onlyOwner {
         require(
             maxTxAmount >= 1_500_000 * 10 ** 9,
-            "PocMon: maxTxAmount should be greater than 1500000e9"
+            "Gold: maxTxAmount should be greater than 1500000e9"
         );
         _maxTxAmount = maxTxAmount;
     }
@@ -283,7 +283,7 @@ contract Gold is Ownable, IResources {
         uint256 tAmount,
         bool deductTransferFee
     ) public view returns (uint256) {
-        require(tAmount <= _tTotal, "PocMon: amount must be less than supply");
+        require(tAmount <= _tTotal, "Gold: amount must be less than supply");
         if (!deductTransferFee) {
             (uint256 rAmount, , , , , ) = _getValues(tAmount);
             return rAmount;
@@ -298,7 +298,7 @@ contract Gold is Ownable, IResources {
     ) public view returns (uint256) {
         require(
             rAmount <= _rTotal,
-            "PocMon: amount must be less than total reflections"
+            "Gold: amount must be less than total reflections"
         );
         uint256 currentRate = _getRate();
         return rAmount.div(currentRate);
@@ -478,28 +478,28 @@ contract Gold is Ownable, IResources {
     }
 
     function _approve(address owner, address spender, uint256 amount) private {
-        require(owner != address(0), "PocMon: approve from the zero address");
-        require(spender != address(0), "PocMon: approve to the zero address");
+        require(owner != address(0), "Gold: approve from the zero address");
+        require(spender != address(0), "Gold: approve to the zero address");
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
     function _transfer(address from, address to, uint256 amount) private {
-        require(from != address(0), "PocMon: transfer from the zero address");
-        require(to != address(0), "PocMon: transfer to the zero address");
+        require(from != address(0), "Gold: transfer from the zero address");
+        require(to != address(0), "Gold: transfer to the zero address");
         require(
             amount > 0,
-            "PocMon: transfer amount must be greater than zero"
+            "Gold: transfer amount must be greater than zero"
         );
         require(
             amount <= balanceOf(from),
-            "PocMon: transfer amount exceeds balance"
+            "Gold: transfer amount exceeds balance"
         );
         if (from != owner() && to != owner()) {
             require(
                 amount <= _maxTxAmount,
-                "PocMon: transfer amount exceeds the maxTxAmount."
+                "Gold: transfer amount exceeds the maxTxAmount."
             );
         }
 

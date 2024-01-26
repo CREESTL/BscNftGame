@@ -1,8 +1,8 @@
-# PocMon
+# Tree
 
 
 
-> This contract represents 3 types of resources used to start mining,        buy and craft tools
+> Tree token
 
 
 

@@ -13,7 +13,7 @@
 ### addTool
 
 ```solidity
-function addTool(uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmounts, string newURI) external nonpayable returns (uint256)
+function addTool(uint32 maxStrength, uint32 miningDuration, uint256 energyCost, uint32 strengthCost, uint256 resourcesAmount, uint256[] artifactsAmounts, string newURI) external nonpayable returns (uint256)
 ```
 
 Adds a new tool.
@@ -26,7 +26,7 @@ Adds a new tool.
 |---|---|---|
 | maxStrength | uint32 | The maximum strength of the tool |
 | miningDuration | uint32 | The duration of mining session with the tool |
-| energyCost | uint32 | The cost in Berry tokens to start mining session with the tool |
+| energyCost | uint256 | The cost in Berry tokens to start mining session with the tool |
 | strengthCost | uint32 | The cost in tool strength to start mining session with it |
 | resourcesAmount | uint256 | Amount of Tree tokens requires to craft a tool |
 | artifactsAmounts | uint256[] | Amounts of each type of artifacts to craft a tool |
@@ -569,7 +569,7 @@ Changes the recipe of the tool
 ### setToolProperties
 
 ```solidity
-function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDuration, uint32 energyCost, uint32 strengthCost) external nonpayable
+function setToolProperties(uint256 toolType, uint32 maxStrength, uint32 miningDuration, uint256 energyCost, uint32 strengthCost) external nonpayable
 ```
 
 Changes properties of the tool
@@ -583,7 +583,7 @@ Changes properties of the tool
 | toolType | uint256 | The type of the tool |
 | maxStrength | uint32 | The maximum strength of the tool |
 | miningDuration | uint32 | The duration of mining session with the tool |
-| energyCost | uint32 | The cost in Berry tokens to start mining session with the tool |
+| energyCost | uint256 | The cost in Berry tokens to start mining session with the tool |
 | strengthCost | uint32 | The cost in tool strength to start mining session with it |
 
 ### setURI
