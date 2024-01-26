@@ -172,6 +172,14 @@ interface ITools is IERC1155Upgradeable {
         uint256 toolId
     ) external view returns (bool);
 
+    /// @notice Changes addresses of resources
+    /// @param resourceId The type of resource
+    /// @param resourceAddress The new address of the resource
+    function setResourceAddress(
+        uint256 resourceId,
+        address resourceAddress
+    ) external;
+
     /// @notice Adds a new tool.
     /// @param maxStrength The maximum strength of the tool
     /// @param miningDuration The duration of mining session with the tool

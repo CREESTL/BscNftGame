@@ -218,6 +218,22 @@ contract Tools is
         return _ownedTools[user][toolId].toolType != 0;
     }
 
+    /// @notice See {ITools-setResourceAddress}
+    function setResourceAddress(
+        uint256 resourceId,
+        address resourceAddress
+    ) external onlyOwner {
+
+        require(
+            resourceAddress != address(0),
+            "Tools: invalid resource address"
+        );
+
+        _resources[Resources(resourceId)] = IResources(resourceAddress);
+
+    }
+
+
     /// @notice See {ITools-addTool}
     function addTool(
         uint32 maxStrength,
