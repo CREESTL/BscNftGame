@@ -21,3 +21,5 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log(`Mining deployed at ${deployResult.address}`);
   }
 };
+
+module.exports.tags = ["Mining"];
