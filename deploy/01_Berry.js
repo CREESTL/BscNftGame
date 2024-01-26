@@ -19,7 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     from: deployer,
     contract: "Berry",
     args: ["BERRY", PANCAKE_ROUTER_ADDRESS, gem.address, deployer, deployer],
-    log: True
+    log: true
   });
   if (deployResult.newlyDeployed) {
     log(`Berry deployed at ${deployResult.address}`);

@@ -7,7 +7,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const mining = await get("Mining");
   const artifacts = await get("Artifacts");
   const tools = await get("Tools");
-    console.log("TOOLS adr: ", tools.address)
   const toolsProxy = await ethers.getContractAt("Tools", tools.address);
   const artifactsProxy = await ethers.getContractAt(
     "Artifacts",

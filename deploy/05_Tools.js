@@ -8,11 +8,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const tree = await get("Tree");
   const gold = await get("Gold");
 
-    //TODO: 
-console.log("Berry address is: ", berry.address)
-console.log("Tree address is: ", tree.address)
-console.log("Gold address is: ", gold.address)
-
   const deployResult = await deploy("Tools", {
     from: deployer,
     proxy: {
